@@ -1,1 +1,90 @@
-<p>{{message}}</p>
+ <div class="container">
+  <!-- Example row of columns -->
+  <div class="row">
+    <div class="col-md-12 well">
+      <form class="form-inline">
+	    <div class="form-group">
+		  <label for="appID">App ID</label>
+		  <input type="text" class="form-control" id="appID">
+		</div>
+		<div class="form-group">
+		  <label for="appKey">App Key</label>
+		  <input type="text" class="form-control" id="appKey">
+		</div>
+		<select class="form-control">
+		  <option>dev-jp</option>
+		</select>
+		<button type="submit" class="btn btn-default">Set environment</button>
+	  </form>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="well">User Dashboard</h3>
+      <form class="form">
+	    <div class="form-group">
+		  <label for="username">Username</label>
+		  <input type="text" class="form-control" id="username">
+		</div>
+		<div class="form-group">
+		  <label for="password">Password</label>
+		  <input type="password" class="form-control" id="password">
+		</div>
+		<button type="submit" class="btn btn-default">Register user</button>
+	  </form>
+	  <hr>
+	  <form class="form">
+	    <div class="form-group">
+		  <label for="vendorThingID">VendorThingID</label>
+		  <input type="text" class="form-control" id="vendorThingID">
+		</div>
+		<div class="form-group">
+		  <label for="thingPassword">Password</label>
+		  <input type="password" class="form-control" id="thingPassword">
+		</div>
+		<button type="submit" class="btn btn-default">Register thing</button>
+	  </form>
+	  <hr>
+	  <form class="form">
+	    <div class="form-group">
+		  <label for="commandPayload">Command payload</label>
+		  <textarea type="text" class="form-control" id="commandPayload"/>
+		</div>
+		<button type="submit" class="btn btn-default">Send command</button>
+	  </form>
+	  <hr>
+	  <form class="form">
+	    <div class="form-group">
+		  <label for="actionResults">Action results</label>
+		  <textarea type="text" class="form-control" id="actionResults" readonly/>
+		</div>
+	  </form>
+
+    </div>
+    <div class="col-md-6">
+      <h3 class="well">Thing Dashboard</h3>
+      <p>Status: Connected</p>
+      <form class="form">
+	    <div class="form-group">
+		  <label for="actionResults">Actions</label>
+		  <textarea type="text" class="form-control" id="actionResults" readonly/>
+		</div>
+	  </form>
+	  <hr>
+	  <form class="form">
+	    <div class="form-group">
+		  <label for="thingState">State</label>
+		  <textarea type="text" class="form-control" id="thingState"/>
+		</div>
+		<button type="submit" class="btn btn-default">Update state</button>
+	  </form>
+	  <form class="form">
+	    <div class="form-group">
+		  <label for="sendActionResults">Send Action Results</label>
+		  <textarea type="text" class="form-control" id="sendActionResults"/>
+		</div>
+		<button type="submit" class="btn btn-default">Send action results</button>
+	  </form>
+   </div>
+  </div>
+</div>
