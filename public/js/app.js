@@ -10,5 +10,9 @@ config(['$routeProvider', function($routeProvider) {
     templateUrl: 'templates/mqtt-test.html',
     controller: 'ConnectionCtrl'
   })
+  $routeProvider.when('/connection', {
+    templateUrl: 'templates/connection-test.html',
+    controller: 'TestCtrl'
+  })
   .otherwise({redirectTo: '/demo'});
 }]);

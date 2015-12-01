@@ -5,4 +5,9 @@ angular.module('mqttDemo.controllers',[])
 
   $scope.message = 'Hello!';
 
+}])
+.controller('TestCtrl', ['$scope',function($scope) {
+
+  $scope.message = 'Hello!';
+
 }]);
