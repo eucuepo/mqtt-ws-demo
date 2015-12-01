@@ -8,20 +8,47 @@ angular.module('mqttDemo.controllers',[])
 }])
 .controller('TestCtrl', ['$scope','mqttClient',function($scope,mqttClient) {
 
+  $scope.connected = false;
+
+  $scope.receivedMessages = "";
+
+  $scope.mqttClientConfig = {
+  	host: "development-jp-mqtt-540df7a171962834.internal.kii.com",
+  	port: 12470
+  }
+
+  $scope.connect = function(mqttClientConfig){
+  	mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
+  	  .then(function(){
+  	  	$scope.connected = true;
+  	  },
+  	  function(err){
+  	  	alert(JSON.stringify(err));
+  	  });
+  }
+
+  $scope.disconnect = function(){
+  	mqttClient.disconnect();
+  	$scope.connected = false;
+  }
+
+  $scope.subscribe = function(topic){
+  	mqttClient.subscribe(topic);
+  }
+
+  $scope.sendMessage = function(topic, message){
+  	mqttClient.sendMessage(topic,message);
+  }
+
   var onConnectionLost = function(responseObject) {
-	console.log(responseObject);
+	$scope.connected = false;
   }
 
   var onMessageReceived = function(message) {
-	console.log(message);
+  	console.log(message.payloadString);
+  	$scope.$apply(function () {
+        $scope.receivedMessages +=  message.payloadString + '\n';
+    });
   }
-
-  var onConnect = function() {
-    console.log('connected!');  
-  }
-
-  mqttClient.init('development-jp-mqtt-8bfa32197598.internal.kii.com', 12470, 'hoc0CCowjuzV3wMSaLL6Lz8', '596cd936-x2gKbLiEnDx5EUCP76UzKnh','gjoFusjbpeCEFEVEowBnNekehieHiBlnqzVTUqJITBGjlhQNgaECKUToOvWtrZZT',onMessageReceived,onConnectionLost,onConnect);
-  $scope.message = 'Hello!';
-
 
 }]);
