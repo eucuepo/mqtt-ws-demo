@@ -23,7 +23,7 @@ angular.module('mqttDemo.controllers',[])
   	  	$scope.connected = true;
   	  },
   	  function(err){
-  	  	alert(JSON.stringify(err));
+  	  	alert('Error connecting: ' + JSON.stringify(err));
   	  });
   }
 
@@ -36,16 +36,11 @@ angular.module('mqttDemo.controllers',[])
   	mqttClient.subscribe(topic);
   }
 
-  $scope.sendMessage = function(topic, message){
-  	mqttClient.sendMessage(topic,message);
-  }
-
   var onConnectionLost = function(responseObject) {
 	$scope.connected = false;
   }
 
   var onMessageReceived = function(message) {
-  	console.log(message.payloadString);
   	$scope.$apply(function () {
         $scope.receivedMessages +=  message.payloadString + '\n';
     });
