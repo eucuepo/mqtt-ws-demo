@@ -4,4 +4,6 @@ This is the MQTT over WSS demo for Kii Cloud
 
 ## Install
 
-from command line run `npm start`
+From command line run `npm start`
+
+Then open http://localhost:3000
