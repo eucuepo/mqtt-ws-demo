@@ -41,7 +41,7 @@ angular.module('mqttDemo.services',[])
     init: init,
     subscribe: subscribe,
     sendMessage: sendMessage,
-    disconnect, disconnect
+    disconnect: disconnect
   }
 }])
 .service('kiiMqttClient', ['$q',function kiiMqttClientFactory($q) {
@@ -74,6 +74,10 @@ angular.module('mqttDemo.services',[])
   	
   }
 
+  var disconnect = function() {
+    // TODO to be filled
+  }
+
   return {
     init: init,
     onboardThing: onboardThing,
@@ -81,25 +85,28 @@ angular.module('mqttDemo.services',[])
   }
 }])
 .factory('sendHttpRequest', function() {
-  return function(method, url, headers, data, callbacks) {
+  return function(method, url, headers, data, completeHandler, failureHandler) {
     var xhr = new XMLHttpRequest();
 
     xhr.open(method, url, true);
     xhr.onreadystatechange = function() {
-      if(xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
-        console.log("onComplete");
-        console.log("readyState", xhr.readyState);
-        console.log("status", xhr.status);
-        console.log("responseText", xhr.responseText);
+      if(xhr.readyState == 4) {
+        if (xhr.status == 200 || xhr.status == 201) {
+          console.log("onComplete");
+          console.log("readyState", xhr.readyState);
+          console.log("status", xhr.status);
+          console.log("responseText", xhr.responseText);
 
-        callbacks.onComplete(xhr.responseText);
-      } else if (xhr.status != 200 && xhr.status != 201){
+          completeHandler(xhr.responseText);
+        } else {
 
-        console.log("onError");
-        console.log("readyState", xhr.readyState);
-        console.log("status", xhr.status);
-        console.log("responseText", xhr.responseText);
-        callbacks.onFailure(xhr.readystate, xhr.status, xhr.responseText);
+          console.log("onFailure");
+          console.log("readyState", xhr.readyState);
+          console.log("status", xhr.status);
+          console.log("responseText", xhr.responseText);
+
+          failureHandler(xhr.readyState, xhr.status, xhr.responseText);
+        }
       }
     };
 

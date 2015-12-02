@@ -25,9 +25,21 @@ angular.module('mqttDemo.controllers',[])
       password:""
     }
 
+    // userMessage.actions => thingMessage.receivedActions
+    // userMessage.receivedActionResults <= thingMessage.state
+    // userMessage.receivedActionResults <= thingMessage.actionResults
+    $scope.userMessage = {
+      actions: "",
+      receivedActionResults: ""
+    };
 
-    // $scope.isUserRegistered = false;
-    // $scope.isThingRegistered = false;
+    $scope.thingMessage = {
+      receivedActions: "",
+      state: "",
+      actionResults: ""
+    };
+
+    $scope.connected = false;
 
     $scope.sdkInitialized = false;
 
@@ -79,6 +91,7 @@ angular.module('mqttDemo.controllers',[])
     });
   }
 
+  // install the MQTT for user
   function installMQTTForUser(theUser) {
 
     var url = KiiSite[$scope.KiiInfo.site] + "/apps/" + $scope.KiiInfo.appID + "/installations";
@@ -95,17 +108,14 @@ angular.module('mqttDemo.controllers',[])
       "development":true
     };
 
-    var callbacks = {
-      onComplete: function(response) {
-        
-        retrieveMQTTEndpointForUser(theUser, JSON.parse(response).installationID, 5);
-      },
-      onError: function(readyState, status, response) {
-
-      }
+    var onComplete = function(response) { 
+      retrieveMQTTEndpointForUser(theUser, JSON.parse(response).installationID, 5);
     };
 
-    sendHttpRequest("POST", url, headers, JSON.stringify(data), callbacks);
+    var onFailure = function(readyState, status, response) {
+    };
+
+    sendHttpRequest("POST", url, headers, JSON.stringify(data), onComplete, onFailure);
   }
 
   function retrieveMQTTEndpointForUser(theUser, installationID, retryCount) {
@@ -117,76 +127,85 @@ angular.module('mqttDemo.controllers',[])
       "x-kii-appkey": $scope.KiiInfo.appKey
     };
 
-    var callbacks = {
-      onComplete: function(response) {
+    var onComplete = function(response) {
 
-        console.log("received", response);
+      var mqttEndpointInfo = JSON.parse(response);
 
-        var mqttEndpointInfo = JSON.parse(response);
+      var mqttClientConfig = {
+        host: mqttEndpointInfo.host,
+        port: mqttEndpointInfo.portWS,
+        username: mqttEndpointInfo.username,
+        password: mqttEndpointInfo.password,
+        clientID: mqttEndpointInfo.mqttTopic
+      };
 
-        var mqttClientConfig = {
-          host: mqttEndpointInfo.host,
-          port: mqttEndpointInfo.portWS,
-          username: mqttEndpointInfo.username,
-          password: mqttEndpointInfo.password,
-          clientID: mqttEndpointInfo.mqttTopic
-        };
+      connectMQTTEndpointForUser(mqttClientConfig);
+    };
 
-        connectMQTTEndpoint(mqttClientConfig);
-      },
-      onFailure: function(readyState, status, response) {
-        console.log("retry", retryCount);
-        if(retryCount > 0) {
-          setTimeout(function() {
-            retrieveMQTTEndpointForUser(theUser, installationID, retryCount-1);
-          }, 5000);
-        }
+    var onFailure = function(readyState, status, response) {
+      console.log("retry", retryCount);
+      if(retryCount > 0) {
+        setTimeout(function() {
+          retrieveMQTTEndpointForUser(theUser, installationID, retryCount-1);
+        }, 5000);
       }
     };
 
-    sendHttpRequest("GET", url, headers, null, callbacks);
+    sendHttpRequest("GET", url, headers, null, onComplete, onFailure);
   }
 
-  var connectMQTTEndpoint = function(mqttClientConfig){
-    // mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
-    //   .then(function(){
-    //     $scope.connected = true;
-    //     alert("MQTT Connected")
-    //   },
-    //   function(err){
-    //     alert('Error connecting: ' + JSON.stringify(err));
-    //   });
-  
-    var client = new Paho.MQTT.Client(mqttClientConfig.host, mqttClientConfig.port, mqttClientConfig.clientID);
-      // connect the client
-    client.connect({onSuccess:function(){
-        alert("MQTT Connected")
-        console.log("MQTT Connected");
-      },
-      onFailure:function(err){
-        alert("MQTT onFailure")
-        console.log("MQTT onFailure", err);
-      }, 
-      userName: mqttClientConfig.username, 
-      password: mqttClientConfig.password}
-    );
-    
-    client.onConnectionLost = function(responseObject) {
+  var connectMQTTEndpointForUser = function(mqttClientConfig){
+
+    var onConnectionLost = function(responseObject) {
       $scope.connected = false;
-      alert("Connection Lost");
-    };
+      alert("Conneciton Lost");
+    }
 
-    client.onMessageArrived = function(message) {
+    var onMessageReceived = function(message) {
       $scope.$apply(function () {
-          $scope.receivedMessages +=  message.payloadString + '\n';
+          $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
+          alert("Message Received");
       });
-    };
+    }
 
+    mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
+      .then(function(){
+        $scope.connected = true;
+      },
+      function(err){
+        alert('Error connecting: ' + JSON.stringify(err));
+      });
   }
+
+  // $scope.disconnect = function(){
+  //   mqttClient.disconnect();
+  //   $scope.connected = false;
+  // }
+
+  // $scope.subscribe = function(topic){
+  //   mqttClient.subscribe(topic);
+  // }
 
   $scope.onClickRegisterThing = function(thingInfo) {
 
-    kiiMqttClient(thingInfo.vendorThingID, thingInfo.password, $scope.userInfo.userObject._uuid, $scope.userInfo.userObject._accessToken);
+    // TODO client for Thing?
+    var client;
+
+    kiiMqttClient.init(client);
+
+    kiiMqttClient.onboardThing($scope.KiiInfo.appID, thingInfo.vendorThingID, thingInfo.password, $scope.userInfo.userObject._uuid, $scope.userInfo.userObject._accessToken);
+
+  }
+
+  $scope.onClickSendCommand = function() {
+
+  }
+
+  $scope.onClickUpdateState = function() {
+
+  }
+
+  $scope.onClickSendActionResults = function() {
 
   }
 
