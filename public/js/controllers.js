@@ -210,7 +210,7 @@ angular.module('mqttDemo.controllers',[])
   }
 
 }])
-.controller('TestCtrl', ['$scope','mqttClient',function($scope,mqttClient) {
+.controller('TestCtrl', ['$scope','mqttClient','kiiMqttClient',function($scope, mqttClient, kiiMqttClient) {
 
   $scope.connected = false;
 
@@ -221,8 +221,11 @@ angular.module('mqttDemo.controllers',[])
   	port: 12470
   }
 
+  var userMqttClient;
+
   $scope.connect = function(mqttClientConfig){
-  	mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
+  	userMqttClient = mqttClient.getInstance(mqttClientConfig,onMessageReceived,onConnectionLost);
+  	userMqttClient.connect()
   	  .then(function(){
   	  	$scope.connected = true;
   	  },
@@ -232,12 +235,17 @@ angular.module('mqttDemo.controllers',[])
   }
 
   $scope.disconnect = function(){
-  	mqttClient.disconnect();
+  	userMqttClient.disconnect();
   	$scope.connected = false;
   }
 
   $scope.subscribe = function(topic){
-  	mqttClient.subscribe(topic);
+  	userMqttClient.subscribe(topic);
+  }
+
+  $scope.testOnboard = function(){
+  	kiiMqttClient.init(userMqttClient);
+  	kiiMqttClient.onboardThing('596cd936', 'testvendor', 'testpass', '53ae324be5a0-d438-5e11-1c89-0c737777', 'NTgqj2qDXBHg6dix8RANtXS05zyIuRDhyd3PSbawig8');
   }
 
   var onConnectionLost = function(responseObject) {
