@@ -21,12 +21,11 @@ angular.module('mqttDemo.services',[])
     try {
       this.client = new Paho.MQTT.Client(this.config.host, this.config.port, this.config.clientID);
       // connect the client
-      console.log(this.client);
 	  this.client.connect({
 	  	onSuccess:function(){
 	  		// auto subscribe to the topic
-	  		this.client.subscribe(this.config.clientID);
-	  		deferred.resolve()
+	  		//this.client.subscribe(this.config.clientID);
+	  		deferred.resolve();
 	  	},
 	  	onFailure:function(err){deferred.reject(err)}, 
 	  	userName: this.config.username, 
@@ -90,8 +89,7 @@ angular.module('mqttDemo.services',[])
 
   return {
     init: init,
-    onboardThing: onboardThing,
-    disconnect: disconnect
+    onboardThing: onboardThing
   }
 }])
 .factory('sendHttpRequest', function() {

@@ -187,7 +187,7 @@ angular.module('mqttDemo.controllers',[])
 
 
 }])
-.controller('TestCtrl', ['$scope','mqttClient',function($scope,mqttClient) {
+.controller('TestCtrl', ['$scope','mqttClient','kiiMqttClient',function($scope, mqttClient, kiiMqttClient) {
 
   $scope.connected = false;
 
@@ -218,6 +218,11 @@ angular.module('mqttDemo.controllers',[])
 
   $scope.subscribe = function(topic){
   	userMqttClient.subscribe(topic);
+  }
+
+  $scope.testOnboarding = function(){
+  	kiiMqttClient.init(userMqttClient);
+  	kiiMqttClient.onboardThing('596cd936', 'testvendor', 'testpass', '53ae324be5a0-d438-5e11-1c89-0c737777', 'NTgqj2qDXBHg6dix8RANtXS05zyIuRDhyd3PSbawig8');
   }
 
   var onConnectionLost = function(responseObject) {
