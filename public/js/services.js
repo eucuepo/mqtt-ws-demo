@@ -82,8 +82,10 @@ angular.module('mqttDemo.services',[])
   		owner: 'USER:'+userID
   	}
   	onboardingMessage += JSON.stringify(payload);
-  	var topic = 'p/' + pahoClient.clientID + '/thing-if/apps/' + appID + '/onboardings';
-  	pahoClient.sendMessage(topic,message);
+  	var topic = 'p/' + pahoClient.config.clientID + '/thing-if/apps/' + appID + '/onboardings';
+	console.log(topic);
+  	console.log(onboardingMessage);
+  	pahoClient.sendMessage(topic,onboardingMessage);
   	
   }
 

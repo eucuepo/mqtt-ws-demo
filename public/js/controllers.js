@@ -224,7 +224,7 @@ angular.module('mqttDemo.controllers',[])
   	userMqttClient.subscribe(topic);
   }
 
-  $scope.testOnboarding = function(){
+  $scope.testOnboard = function(){
   	kiiMqttClient.init(userMqttClient);
   	kiiMqttClient.onboardThing('596cd936', 'testvendor', 'testpass', '53ae324be5a0-d438-5e11-1c89-0c737777', 'NTgqj2qDXBHg6dix8RANtXS05zyIuRDhyd3PSbawig8');
   }
