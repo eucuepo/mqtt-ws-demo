@@ -34,6 +34,37 @@ angular.module('mqttDemo.services',[])
   return {
     init: init,
     subscribe: subscribe,
-    disconnect, disconnect
+    disconnect: disconnect
   }
-}]);
+}])
+.factory('sendHttpRequest', function() {
+  return function(method, url, headers, data, callbacks) {
+    var xhr = new XMLHttpRequest();
+
+    xhr.open(method, url, true);
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
+        console.log("onComplete");
+        callbacks.onComplete(xhr.responseText);
+      } else {
+        console.log("onError");
+        console.log("readyState", xhr.readyState);
+        console.log("status", xhr.status);
+        console.log("responseText", xhr.responseText);
+        callbacks.onError(xhr.readystate, xhr.status, xhr.responseText);
+      }
+    };
+
+    for (var key in headers) {
+      var value = headers[key];
+      console.log(key, value);
+      xhr.setRequestHeader(key, value);
+    }
+
+    if(method !== "GET" && method !== "DELETE") {
+      xhr.send(data);
+    } else {
+      xhr.send();
+    }
+  };
+});

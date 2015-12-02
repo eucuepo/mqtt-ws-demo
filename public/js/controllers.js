@@ -3,7 +3,7 @@
 var KiiEnv = Kii;
 
 angular.module('mqttDemo.controllers',[])
-.controller('ConnectionCtrl', ['$scope',function($scope) {
+.controller('ConnectionCtrl', ['$scope','mqttClient','sendHttpRequest', function($scope,mqttClient,sendHttpRequest) {
 
   $scope.init = function() {
     console.log("init()");
@@ -16,9 +16,9 @@ angular.module('mqttDemo.controllers',[])
 
     $scope.userInfo = {
       userName:"someusername",
-      password:"somepassword",
-      userObject:{}
+      password:"somepassword"
     };
+
 
     // $scope.isUserRegistered = false;
     // $scope.isThingRegistered = false;
@@ -41,11 +41,11 @@ angular.module('mqttDemo.controllers',[])
 
   }
 
-  $scope.onClickRegisterUser = function() {
-    console.log($scope.userInfo.userName, $scope.userInfo.password);
+  $scope.onClickRegisterUser = function(userInfo) {
+    console.log(userInfo.userName, userInfo.password);
 
     // Create the KiiUser object
-    var user = KiiUser.userWithUsername($scope.userInfo.userName, $scope.userInfo.password);
+    var user = KiiUser.userWithUsername(userInfo.userName, userInfo.password);
 
     // Register the user, defining callbacks for when the process completes
     user.register({
@@ -56,8 +56,7 @@ angular.module('mqttDemo.controllers',[])
         console.log(theUser);
         console.log("user id: " + theUser._uuid);
 
-        $scope.userInfo.userObject = theUser;
-
+        installMQTTForUser(theUser);
       },
       // Called on a failed registration
       failure: function(theUser, errorString) {
@@ -67,32 +66,100 @@ angular.module('mqttDemo.controllers',[])
     });
   }
 
+  function installMQTTForUser(theUser) {
 
-  function sendHttpRequest(method, url, headers, data, callbacks) {
+    var url = KiiSite[$scope.KiiInfo.site] + "/apps/" + $scope.KiiInfo.appID + "/installations";
 
-    var request = new XMLHttpRequest();
+    var headers = {
+      "content-type": "application/vnd.kii.InstallationCreationRequest+json",
+      "Authorization": "bearer " + theUser._accessToken,
+      "x-kii-appid": $scope.KiiInfo.appID,
+      "x-kii-appkey": $scope.KiiInfo.appKey
+    };
 
-    request.open(method, url, true);
-    request.onreadystatechange = function() {
-      if(request.readystate == 4 && request.status == 200) {
-        console.log("onComplete");
-        callbacks.onComplete(request.responseText);
-      } else {
-        console.log("onError");
-        callbacks.onError();
+    var data = {
+      "deviceType": "MQTT",
+      "development":true
+    };
+
+    var callbacks = {
+      onComplete: function(response) {
+        
+        retrieveMQTTEndpointForUser(theUser, JSON.parse(response).installationID, 5);
+      },
+      onError: function(readyState, status, response) {
+
       }
     };
 
-    for (key in headers) {
-      value = headers[key];
-      request.setRequestHeader(key, value);
-    }
+    sendHttpRequest("POST", url, headers, JSON.stringify(data), callbacks);
+  }
 
-    if(method !== "GET" && method !== "DELETE") {
-      request.send(data);
-    } else {
-      request.send();
-    }
+  function retrieveMQTTEndpointForUser(theUser, installationID, retryCount) {
+    var url = KiiSite[$scope.KiiInfo.site] + "/apps/" + $scope.KiiInfo.appID + "/installations/" + installationID + "/mqtt-endpoint" ;
+
+    var headers = {
+      "Authorization": "bearer " + theUser._accessToken,
+      "x-kii-appid": $scope.KiiInfo.appID,
+      "x-kii-appkey": $scope.KiiInfo.appKey
+    };
+
+    var callbacks = {
+      onComplete: function(response) {
+
+        var mqttEndpointInfo = JSON.parse(response);
+
+        var mqttClientConfig = {
+          host: mqttEndpointInfo.host,
+          port: mqttEndpointInfo.portWS,
+          username: mqttEndpointInfo.username,
+          password: mqttEndpointInfo.password,
+          clientID: mqttEndpointInfo.installationID
+        };
+
+        // TODO to add source code for MQTT connect
+        // connectMQTTEndpoint(mqttClientConfig);
+      },
+      onError: function(readyState, status, response) {
+        console.log("retry", retryCount);
+        if(retryCount > 0) {
+          setTimeout(function() {
+            retrieveMQTTEndpointForUser(theUser, installationID, retryCount-1);
+          }, 5000);
+        }
+      }
+    };
+
+    sendHttpRequest("GET", url, headers, null, callbacks);
+  }
+
+  var connectMQTTEndpoint = function(mqttClientConfig){
+    mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
+      .then(function(){
+        $scope.connected = true;
+      },
+      function(err){
+        alert('Error connecting: ' + JSON.stringify(err));
+      });
+  }
+
+  $scope.disconnect = function(){
+    mqttClient.disconnect();
+    $scope.connected = false;
+  }
+
+  $scope.subscribe = function(topic){
+    mqttClient.subscribe(topic);
+  }
+
+  var onConnectionLost = function(responseObject) {
+    $scope.connected = false;
+  }
+
+  var onMessageReceived = function(message) {
+    $scope.$apply(function () {
+        $scope.receivedMessages +=  message.payloadString + '\n';
+    });
   }
 
 
@@ -138,3 +205,5 @@ angular.module('mqttDemo.controllers',[])
   }
 
 }]);
+
+
