@@ -52,23 +52,26 @@ angular.module('mqttDemo.services',[])
   	pahoClient = client;
   }
 
-  var onboardThing = function(vendorThingID, thingPassword, userID, token){
-  	// send this 
-    /*
-    POST
-	Content-type:application/vnd.kii.OnboardingWithVendorThingIDByOwner+json
-	Authorization:Bearer zxcwuctmfowefzx-czxveewf
-	X-Kii-RequestID:asdf1234
+  var onboardThing = function(appID, vendorThingID, thingPassword, userID, token){
 
-	{
-	    “vendorThingID”:“th.53ae324be5a0-2fbb-4e11-1434-038bc695”,
-	    “thingPassword”:“asdfzxcv890”,
-	    "owner":
-	}
-	*/
-
-	// to
-	// p/<clientID>/thing-if/apps/<appID>/targets/THING:<thingID>/states
+  	// fill onboarding message
+  	var onboardingMessage = 'POST\n';
+  	onboardingMessage += 'Content-type:application/vnd.kii.OnboardingWithVendorThingIDByOwner+json\n';
+  	onboardingMessage += 'Authorization:Bearer '+token+'\n';
+  	// TODO: generate ID to check it back
+  	onboardingMessage += 'X-Kii-RequestID:asdf1234\n';
+  	// mandatory blank line
+  	onboardingMessage += '\n';
+  	// payload
+  	var payload ={
+  		vendorThingID: vendorThingID,
+  		thingPassword: thingPassword,
+  		owner: 'USER:'+userID
+  	}
+  	onboardingMessage += JSON.stringify(payload);
+  	var topic = 'p/' + pahoClient.clientID + '/thing-if/apps/' + appID + '/onboardings';
+  	pahoClient.sendMessage(topic,message);
+  	
   }
 
   return {
