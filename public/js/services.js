@@ -3,7 +3,6 @@
 angular.module('mqttDemo.services',[])
 .service('mqttClient', ['$q',function mqttClientFactory($q) {
 
-
   var MqttClient = function (config, messageHandler, disconnectHandler) {
   	this.config = config;
   	this.messageHandler = messageHandler;
@@ -83,15 +82,13 @@ angular.module('mqttDemo.services',[])
   	}
   	onboardingMessage += JSON.stringify(payload);
   	var topic = 'p/' + pahoClient.config.clientID + '/thing-if/apps/' + appID + '/onboardings';
-	console.log(topic);
-  	console.log(onboardingMessage);
   	pahoClient.sendMessage(topic,onboardingMessage);
   	
   }
 
   var parseResponse = function(message) {
   	var parsed = {
-  		code:''
+  		code:'',
   		headers:[],
   		payload:{}
   	}
@@ -109,31 +106,34 @@ angular.module('mqttDemo.services',[])
   }
 
   return {
-    init: init,
+    init:init,
     onboardThing: onboardThing,
     parseResponse: parseResponse
   }
 }])
 .factory('sendHttpRequest', function() {
-  return function(method, url, headers, data, callbacks) {
+  return function(method, url, headers, data, completeHandler, failureHandler) {
     var xhr = new XMLHttpRequest();
 
     xhr.open(method, url, true);
     xhr.onreadystatechange = function() {
-      if(xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
-        console.log("onComplete");
-        console.log("readyState", xhr.readyState);
-        console.log("status", xhr.status);
-        console.log("responseText", xhr.responseText);
+      if(xhr.readyState == 4) {
+        if (xhr.status == 200 || xhr.status == 201) {
+          console.log("onComplete");
+          console.log("readyState", xhr.readyState);
+          console.log("status", xhr.status);
+          console.log("responseText", xhr.responseText);
 
-        callbacks.onComplete(xhr.responseText);
-      } else if (xhr.status != 200 && xhr.status != 201){
+          completeHandler(xhr.responseText);
+        } else {
 
-        console.log("onError");
-        console.log("readyState", xhr.readyState);
-        console.log("status", xhr.status);
-        console.log("responseText", xhr.responseText);
-        callbacks.onFailure(xhr.readystate, xhr.status, xhr.responseText);
+          console.log("onFailure");
+          console.log("readyState", xhr.readyState);
+          console.log("status", xhr.status);
+          console.log("responseText", xhr.responseText);
+
+          failureHandler(xhr.readyState, xhr.status, xhr.responseText);
+        }
       }
     };
 
