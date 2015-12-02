@@ -43,13 +43,13 @@ angular.module('mqttDemo.controllers',[])
 
     $scope.thingMqttClient = {};
 
-    $scope.connected = false;
-
     $scope.sdkInitialized = false;
 
     // the first message received will be treated as thing boarding response
     // then change this field as true
-    $scope.onboarded = false;
+    $scope.isMQTTConnectedForThing = false;
+
+    $scope.isMQTTConnectedForUser = false;
 
   }
 
@@ -175,11 +175,11 @@ angular.module('mqttDemo.controllers',[])
           alert("Message Received");
 
           // check whether onboarding response
-          if(!$scope.onboarded) {
+          if(!$scope.isMQTTConnectedForThing) {
             var parsed = kiiMqttClient.parseResponse(message);
             connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
 
-            $scope.onboarded = true;
+            $scope.isMQTTConnectedForThing = true;
           }
       });
     };
@@ -189,6 +189,7 @@ angular.module('mqttDemo.controllers',[])
       .then(function(){
         $scope.connected = true;
         console.log("User MQTT Connected");
+        $scope.isMQTTConnectedForUser = true;
       },
       function(err){
         alert('Error connecting: ' + JSON.stringify(err));

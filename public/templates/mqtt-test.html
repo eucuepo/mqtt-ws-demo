@@ -39,21 +39,21 @@
 	  <form class="form">
 	    <div class="form-group">
 		  <label for="vendorThingID">VendorThingID</label>
-		  <input type="text" class="form-control" ng-model="thingInfo.vendorThingID" ng-disabled="!sdkInitialized" id="vendorThingID">
+		  <input type="text" class="form-control" ng-model="thingInfo.vendorThingID" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser" id="vendorThingID">
 		</div>
 		<div class="form-group">
 		  <label for="thingPassword">Password</label>
-		  <input type="password" class="form-control" ng-model="thingInfo.password" ng-disabled="!sdkInitialized" id="thingPassword">
+		  <input type="password" class="form-control" ng-model="thingInfo.password" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser" id="thingPassword">
 		</div>
-		<button type="submit" class="btn btn-default" ng-click="onClickRegisterThing(thingInfo)" ng-disabled="!sdkInitialized">Register thing</button>
+		<button type="submit" class="btn btn-default" ng-click="onClickRegisterThing(thingInfo)" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser">Register thing</button>
 	  </form>
 	  <hr>
 	  <form class="form">
 	    <div class="form-group">
 		  <label for="commandPayload">Command payload</label>
-		  <textarea type="text" class="form-control" ng-disabled="!sdkInitialized" ng-model="userMessage.actions" id="commandPayload"/>
+		  <textarea type="text" class="form-control" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser||!isMQTTConnectedForThing" ng-model="userMessage.actions" id="commandPayload"/>
 		</div>
-		<button type="submit" class="btn btn-default" ng-click="onClickSendCommand()" ng-disabled="!sdkInitialized">Send command</button>
+		<button type="submit" class="btn btn-default" ng-click="onClickSendCommand()" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser||!isMQTTConnectedForThing">Send command</button>
 	  </form>
 	  <hr>
 	  <form class="form">
@@ -77,17 +77,17 @@
 	  <form class="form">
 	    <div class="form-group">
 		  <label for="thingState">State</label>
-		  <textarea type="text" class="form-control" ng-disabled="!sdkInitialized" ng-model="thingMessage.state" id="thingState"/>
+		  <textarea type="text" class="form-control" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser||!isMQTTConnectedForThing" ng-model="thingMessage.state" id="thingState"/>
 		</div>
-		<button type="submit" class="btn btn-default" ng-click="onClickUpdateState()" ng-disabled="!sdkInitialized">Update state</button>
+		<button type="submit" class="btn btn-default" ng-click="onClickUpdateState()" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser">Update state</button>
 	  </form>
 	  <hr>
 	  <form class="form">
 	    <div class="form-group">
 		  <label for="sendActionResults">Send Action Results</label>
-		  <textarea type="text" class="form-control" ng-disabled="!sdkInitialized" ng-model="thingMessage.actionResults" id="sendActionResults"/>
+		  <textarea type="text" class="form-control" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser||!isMQTTConnectedForThing" ng-model="thingMessage.actionResults" id="sendActionResults"/>
 		</div>
-		<button type="submit" class="btn btn-default" ng-click="onClickSendActionResults()" ng-disabled="!sdkInitialized">Send action results</button>
+		<button type="submit" class="btn btn-default" ng-click="onClickSendActionResults()" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser||!isMQTTConnectedForThing">Send action results</button>
 	  </form>
    </div>
   </div>
