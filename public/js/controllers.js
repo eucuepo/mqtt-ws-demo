@@ -295,7 +295,8 @@ angular.module('mqttDemo.controllers',[])
 
   var onMessageReceived = function(message) {
   	$scope.$apply(function () {
-        $scope.receivedMessages +=  message.payloadString + '\n';
+        //$scope.receivedMessages +=  message.payloadString + '\n';
+        $scope.receivedMessages += kiiMqttClient.parseResponse(message.payloadString) + '\n';
     });
   }
 
