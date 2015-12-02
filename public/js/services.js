@@ -74,7 +74,7 @@ angular.module('mqttDemo.services',[])
   	
   }
 
-  MqttClient.prototype.sendCommand = function(appID, actions, thingID, userID, token){
+  MqttClient.prototype.sendCommand = function(appID, payload, thingID, token){
 
   	// fill onboarding message
   	var commandMessage = 'POST\n';
@@ -85,14 +85,29 @@ angular.module('mqttDemo.services',[])
   	// mandatory blank line
   	commandMessage += '\n';
   	// payload
-  	var payload ={
-  		actions: actions,
-  		owner: 'USER:'+userID
-  	}
   	commandMessage += JSON.stringify(payload);
   	var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/targets' + '/THING:'+thingID+'/commands' ;
   	this.sendMessage(topic,commandMessage);
   	
+  }
+
+  MqttClient.prototype.updateState = function(appID, state, thingID, token){
+  	// fill message
+    var stateMessage = 'PUT\n';
+    stateMessage += 'Content-type:application/json\n';
+    stateMessage += 'Authorization:Bearer ' + token+ '\n';
+    // mandatory blank line
+    stateMessage += '\n';
+    // state
+    stateMessage += state;
+
+    // fill topic
+    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/targets/THING:' + thingID + '/states' ;
+    
+    // send out the message to topic
+    this.sendMessage(topic,stateMessage);
+
+    console.log("send to user", topic, stateMessage);
   }
 
   MqttClient.prototype.parseResponse = function(message) {

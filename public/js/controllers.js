@@ -251,13 +251,6 @@ angular.module('mqttDemo.controllers',[])
   $scope.onClickSendCommand = function() {
 
     var userObject = $scope.userInfo.userObject;
-
-    // fill message
-    var commandMessage = 'POST\n';
-    commandMessage += 'Content-type:application/json\n';
-    commandMessage += 'Authorization:Bearer ' + userObject._accessToken + '\n';
-    // mandatory blank line
-    commandMessage += '\n';
     // payload
     var payload ={
       actions: JSON.parse($scope.userMessage.actions),
@@ -265,36 +258,12 @@ angular.module('mqttDemo.controllers',[])
       schema: 'SmartLight',
       schemaVersion: 1
     };
-    commandMessage += JSON.stringify(payload);
-
-    // fill topic
-    var topic = 'p/' + $scope.userMqttClient.config.clientID + '/thing-if/apps/' + $scope.KiiInfo.appID + '/targets/THING:'+$scope.thingInfo.thingID+'/commands' ;
-    
-    // send out the message to topic
-    $scope.userMqttClient.sendMessage(topic,commandMessage);
-
-    console.log("send to thing", topic, commandMessage);
+   
+    $scope.userMqttClient.sendCommand($scope.KiiInfo.appID, payload, $scope.thingInfo.thingID, userObject._accessToken);
   }
 
   $scope.onClickUpdateState = function() {
-
-    // fill message
-    var commandMessage = 'PUT\n';
-    commandMessage += 'Content-type:application/json\n';
-    commandMessage += 'Authorization:Bearer ' + $scope.thingInfo.accessToken + '\n';
-    // mandatory blank line
-    commandMessage += '\n';
-    // state
-    commandMessage += $scope.thingMessage.state;
-
-    // fill topic
-    var topic = 'p/' + $scope.thingMqttClient.config.clientID + '/thing-if/apps/' + $scope.KiiInfo.appID + '/targets/THING:'+$scope.thingInfo.thingID+'/states' ;
-    
-    // send out the message to topic
-    $scope.thingMqttClient.sendMessage(topic,commandMessage);
-
-    console.log("send to user", topic, commandMessage);
-
+    thingMqttClient.updateState($scope.KiiInfo.appID, $scope.thingMessage.state, $scope.thingInfo.thingID, $scope.thingInfo.accessToken);
   }
 
   $scope.onClickSendActionResults = function() {
