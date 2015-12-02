@@ -3,23 +3,36 @@
 angular.module('mqttDemo.services',[])
 .service('mqttClient', ['$q',function mqttClientFactory($q) {
 
-  var client;
 
-  var subscribe = function(topic) {
-    client.subscribe(topic);
+  var MqttClient = function (config, messageHandler, disconnectHandler) {
+  	this.config = config;
+  	this.messageHandler = messageHandler;
+  	this.disconnectHandler = disconnectHandler;
+  };
+
+  // subscribes to the topic
+  MqttClient.prototype.subscribe = function(topic) {
+    this.client.subscribe(topic);
   }
 
-  var init = function(config, messageHandler, disconnectHandler) { 
+  // connects to broker and subscribes to clientID topic
+  MqttClient.prototype.connect = function() {
     var deferred = $q.defer();
     try {
-      client = new Paho.MQTT.Client(config.host, config.port, config.clientID);
+      this.client = new Paho.MQTT.Client(this.config.host, this.config.port, this.config.clientID);
       // connect the client
-	  client.connect({onSuccess:function(){deferred.resolve()},
+      console.log(this.client);
+	  this.client.connect({
+	  	onSuccess:function(){
+	  		// auto subscribe to the topic
+	  		this.client.subscribe(this.config.clientID);
+	  		deferred.resolve()
+	  	},
 	  	onFailure:function(err){deferred.reject(err)}, 
-	  	userName: config.username, 
-	  	password:config.password});
-	  client.onConnectionLost = disconnectHandler;
-      client.onMessageArrived = messageHandler;
+	  	userName: this.config.username, 
+	  	password: this.config.password});
+	  this.client.onConnectionLost = this.disconnectHandler;
+      this.client.onMessageArrived = this.messageHandler;
       
     } catch(err) {
       deferred.reject(err);
@@ -27,21 +40,22 @@ angular.module('mqttDemo.services',[])
     return deferred.promise;
   }
 
-  var disconnect = function(){
-    client.disconnect();
+  // disconnects
+  MqttClient.prototype.disconnect = function(){
+    this.client.disconnect();
   }
 
-  var sendMessage = function(topic,message) {
+  // send message to topic
+  MqttClient.prototype.sendMessage = function(topic,message) {
   	var message = new Paho.MQTT.Message(message);
   	message.destinationName = topic;
-    client.send(message);
+    this.client.send(message);
   }
 
   return {
-    init: init,
-    subscribe: subscribe,
-    sendMessage: sendMessage,
-    disconnect, disconnect
+    getInstance: function (config, messageHandler, disconnectHandler) {
+      return new MqttClient(config, messageHandler, disconnectHandler);
+    }
   }
 }])
 .service('kiiMqttClient', ['$q',function kiiMqttClientFactory($q) {

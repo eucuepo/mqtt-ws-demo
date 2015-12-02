@@ -198,8 +198,11 @@ angular.module('mqttDemo.controllers',[])
   	port: 12470
   }
 
+  var userMqttClient;
+
   $scope.connect = function(mqttClientConfig){
-  	mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
+  	userMqttClient = mqttClient.getInstance(mqttClientConfig,onMessageReceived,onConnectionLost);
+  	userMqttClient.connect()
   	  .then(function(){
   	  	$scope.connected = true;
   	  },
@@ -209,12 +212,12 @@ angular.module('mqttDemo.controllers',[])
   }
 
   $scope.disconnect = function(){
-  	mqttClient.disconnect();
+  	userMqttClient.disconnect();
   	$scope.connected = false;
   }
 
   $scope.subscribe = function(topic){
-  	mqttClient.subscribe(topic);
+  	userMqttClient.subscribe(topic);
   }
 
   var onConnectionLost = function(responseObject) {
