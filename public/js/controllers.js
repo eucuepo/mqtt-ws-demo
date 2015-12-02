@@ -3,7 +3,7 @@
 var KiiEnv = Kii;
 
 angular.module('mqttDemo.controllers',[])
-.controller('ConnectionCtrl', ['$scope','mqttClient', 'kiiMqttClient', 'sendHttpRequest', function($scope,mqttClient,kiiMqttClient,sendHttpRequest) {
+.controller('ConnectionCtrl', ['$scope','mqttClient', 'sendHttpRequest', function($scope,mqttClient, sendHttpRequest) {
 
   var Constant_X_Kii_RequestID = "asdf1234";
 
@@ -180,7 +180,7 @@ angular.module('mqttDemo.controllers',[])
           $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
           alert("Message Received", message);
 
-          var parsed = kiiMqttClient.parseResponse(message.payloadString);
+          var parsed = $scope.userMqttClient.parseResponse(message.payloadString);
 
           // check whether onboarding response
           if(!$scope.isMQTTConnectedForThing) {
@@ -244,9 +244,7 @@ angular.module('mqttDemo.controllers',[])
 
   $scope.onClickRegisterThing = function(thingInfo) {
 
-    kiiMqttClient.init($scope.userMqttClient);
-
-    kiiMqttClient.onboardThing($scope.KiiInfo.appID, thingInfo.vendorThingID, thingInfo.password, $scope.userInfo.userObject._uuid, $scope.userInfo.userObject._accessToken);
+    $scope.userMqttClient.onboardThing($scope.KiiInfo.appID, thingInfo.vendorThingID, thingInfo.password, $scope.userInfo.userObject._uuid, $scope.userInfo.userObject._accessToken);
 
   }
 
@@ -308,7 +306,7 @@ angular.module('mqttDemo.controllers',[])
     // mandatory blank line
     commandMessage += '\n';
     // payload
-    var payload ={
+    var payload = {
       actionResults: JSON.parse($scope.thingMessage.actionResults)
     };
     commandMessage += JSON.stringify(payload);
@@ -323,7 +321,7 @@ angular.module('mqttDemo.controllers',[])
   }
 
 }])
-.controller('TestCtrl', ['$scope','mqttClient','kiiMqttClient',function($scope, mqttClient, kiiMqttClient) {
+.controller('TestCtrl', ['$scope','mqttClient',function($scope, mqttClient) {
 
   $scope.connected = false;
 
@@ -357,8 +355,7 @@ angular.module('mqttDemo.controllers',[])
   }
 
   $scope.testOnboard = function(){
-  	kiiMqttClient.init(userMqttClient);
-  	kiiMqttClient.onboardThing('596cd936', 'testvendor', 'testpass', '53ae324be5a0-d438-5e11-1c89-0c737777', 'NTgqj2qDXBHg6dix8RANtXS05zyIuRDhyd3PSbawig8');
+  	userMqttClient.onboardThing('596cd936', 'testvendor', 'testpass', '53ae324be5a0-d438-5e11-1c89-0c737777', 'NTgqj2qDXBHg6dix8RANtXS05zyIuRDhyd3PSbawig8');
   }
 
   var onConnectionLost = function(responseObject) {
@@ -368,7 +365,7 @@ angular.module('mqttDemo.controllers',[])
   var onMessageReceived = function(message) {
   	$scope.$apply(function () {
         //$scope.receivedMessages +=  message.payloadString + '\n';
-        $scope.receivedMessages += kiiMqttClient.parseResponse(message.payloadString) + '\n';
+        $scope.receivedMessages += JSON.stringify(userMqttClient.parseResponse(message.payloadString)) + '\n';
     });
   }
 

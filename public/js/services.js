@@ -43,6 +43,8 @@ angular.module('mqttDemo.services',[])
     this.client.disconnect();
   }
 
+  // endpoints
+
   // send message to topic
   MqttClient.prototype.sendMessage = function(topic,message) {
   	var message = new Paho.MQTT.Message(message);
@@ -50,21 +52,7 @@ angular.module('mqttDemo.services',[])
     this.client.send(message);
   }
 
-  return {
-    getInstance: function (config, messageHandler, disconnectHandler) {
-      return new MqttClient(config, messageHandler, disconnectHandler);
-    }
-  }
-}])
-.service('kiiMqttClient', ['$q',function kiiMqttClientFactory($q) {
-
-  var pahoClient;
-
-  var init = function(client) {
-  	pahoClient = client;
-  }
-
-  var onboardThing = function(appID, vendorThingID, thingPassword, userID, token){
+  MqttClient.prototype.onboardThing = function(appID, vendorThingID, thingPassword, userID, token){
 
   	// fill onboarding message
   	var onboardingMessage = 'POST\n';
@@ -81,12 +69,12 @@ angular.module('mqttDemo.services',[])
   		owner: 'USER:'+userID
   	}
   	onboardingMessage += JSON.stringify(payload);
-  	var topic = 'p/' + pahoClient.config.clientID + '/thing-if/apps/' + appID + '/onboardings';
-  	pahoClient.sendMessage(topic,onboardingMessage);
+  	var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/onboardings';
+  	this.sendMessage(topic,onboardingMessage);
   	
   }
 
-  var sendCommand = function(appID, actions, thingID, userID, token){
+  MqttClient.prototype.sendCommand = function(appID, actions, thingID, userID, token){
 
   	// fill onboarding message
   	var commandMessage = 'POST\n';
@@ -102,26 +90,25 @@ angular.module('mqttDemo.services',[])
   		owner: 'USER:'+userID
   	}
   	commandMessage += JSON.stringify(payload);
-  	var topic = 'p/' + pahoClient.config.clientID + '/thing-if/apps/' + appID + '/targets' + '/THING:'+thingID+'/commands' ;
-  	pahoClient.sendMessage(topic,commandMessage);
+  	var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/targets' + '/THING:'+thingID+'/commands' ;
+  	this.sendMessage(topic,commandMessage);
   	
   }
 
-  var parseResponse = function(message) {
-  	console.log(message);
+  MqttClient.prototype.parseResponse = function(message) {
   	var parsed = {
   		code:'',
   		headers:[],
   		payload:{}
   	}
   	var lines = message.split('\n');
-  	console.log(lines);
-  	parsed.code = lines[0];
+  	
+  	parsed.code = lines[0].replace('\r','');
   	
   	for (var i=1; i<lines.length; i++){
   	  console.log(lines[i], lines[i].length);
   	  if(lines[i] != '{'){
-  	  	parsed.headers.push(lines[i]);
+  	  	parsed.headers.push(lines[i].replace('\r',''));
   	  } else {
   	  	var payload = '';
   	  	for(var j = i;j<lines.length;j++){
@@ -135,10 +122,9 @@ angular.module('mqttDemo.services',[])
   }
 
   return {
-    init:init,
-    onboardThing: onboardThing,
-    sendCommand: sendCommand,
-    parseResponse: parseResponse
+    getInstance: function (config, messageHandler, disconnectHandler) {
+      return new MqttClient(config, messageHandler, disconnectHandler);
+    }
   }
 }])
 .factory('sendHttpRequest', function() {
