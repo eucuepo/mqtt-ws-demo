@@ -23,7 +23,7 @@ angular.module('mqttDemo.controllers',[])
     // $scope.isUserRegistered = false;
     // $scope.isThingRegistered = false;
 
-    $scope.message = 'Hello!';
+    $scope.sdkInitialized = false;
 
   }
 
@@ -37,8 +37,13 @@ angular.module('mqttDemo.controllers',[])
     }
 
     KiiEnv.initializeWithSite($scope.KiiInfo.appID, $scope.KiiInfo.appKey, site);
-    console.log('Kii sdk initialized')
+    $scope.sdkInitialized = true;
+    console.log('Kii sdk initialized');
 
+  }
+
+  $scope.resetEnvironment = function() {
+    $scope.sdkInitialized = false;
   }
 
   $scope.onClickRegisterUser = function(userInfo) {
