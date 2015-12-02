@@ -89,9 +89,29 @@ angular.module('mqttDemo.services',[])
   	
   }
 
+  var parseResponse = function(message) {
+  	var parsed = {
+  		code:''
+  		headers:[],
+  		payload:{}
+  	}
+  	var lines = message.match(/\n/g)||[];
+  	console.log(lines);
+  	parsed.code = lines[0];
+  	var i;
+  	for (i=1;i<lines.length;i++){
+  	  if(lines[i].length != 0){
+  	  	parsed.headers.push(lines[i]);
+  	  } else {
+  	  	lastLine = i;
+  	  }
+  	}
+  }
+
   return {
     init: init,
-    onboardThing: onboardThing
+    onboardThing: onboardThing,
+    parseResponse: parseResponse
   }
 }])
 .factory('sendHttpRequest', function() {
