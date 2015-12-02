@@ -119,17 +119,17 @@ angular.module('mqttDemo.services',[])
   	parsed.code = lines[0];
   	
   	for (var i=1; i<lines.length; i++){
-  	  console.log(lines[i]);
-  	  if(lines[i] != ''){
+  	  console.log(lines[i], lines[i].length);
+  	  if(lines[i] != '{'){
   	  	parsed.headers.push(lines[i]);
   	  } else {
   	  	var payload = '';
   	  	for(var j = i;j<lines.length;j++){
-	  		payload += lines[j];
-	  	}
-	  	console.log(payload);
-	  	parsed.payload = JSON.parse(payload);
-	  	return parsed;
+  	  		payload += lines[j];
+  	  	}
+  	  	console.log(payload);
+  	  	parsed.payload = JSON.parse(payload);
+  	  	return parsed;
   	  }
   	}
   }

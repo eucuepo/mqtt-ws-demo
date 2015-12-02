@@ -5,6 +5,8 @@ var KiiEnv = Kii;
 angular.module('mqttDemo.controllers',[])
 .controller('ConnectionCtrl', ['$scope','mqttClient', 'kiiMqttClient', 'sendHttpRequest', function($scope,mqttClient,kiiMqttClient,sendHttpRequest) {
 
+  var Constant_X_Kii_RequestID = "asdf1234";
+
   $scope.init = function() {
     console.log("init()");
 
@@ -22,7 +24,9 @@ angular.module('mqttDemo.controllers',[])
 
     $scope.thingInfo = {
       vendorThingID:"",
-      password:""
+      password:"",
+      thingID:"",
+      accessToken:""
     }
 
     // userMessage.actions => thingMessage.receivedActions
@@ -38,6 +42,8 @@ angular.module('mqttDemo.controllers',[])
       state: "",
       actionResults: ""
     };
+
+    $scope.commandIDs = [];
 
     $scope.userMqttClient = {};
 
@@ -172,14 +178,19 @@ angular.module('mqttDemo.controllers',[])
     var onMessageReceived = function(message) {
       $scope.$apply(function () {
           $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
-          alert("Message Received");
+          alert("Message Received", message);
+
+          var parsed = kiiMqttClient.parseResponse(message.payloadString);
 
           // check whether onboarding response
           if(!$scope.isMQTTConnectedForThing) {
-            var parsed = kiiMqttClient.parseResponse(message);
+            
+            $scope.thingInfo.thingID = parsed.payload.thingID;
+            $scope.thingInfo.accessToken = parsed.payload.accessToken;
             connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
-
-            $scope.isMQTTConnectedForThing = true;
+          } else {
+            $scope.commandIDs.push(parsed.payload.commandID);
+            console.log("commandID", parsed.payload.commandID);
           }
       });
     };
@@ -209,7 +220,10 @@ angular.module('mqttDemo.controllers',[])
     };
 
     var onMessageReceived = function(message) {
-      $scope.thingMessage.receivedActions += message + '\n';
+      $scope.$apply(function() {
+        $scope.thingMessage.receivedActions += message.payloadString + '\n';
+        console.log("message", message);
+      });
     };
 
     var onConnectionLost = function(responseObject) {
@@ -220,6 +234,7 @@ angular.module('mqttDemo.controllers',[])
     $scope.thingMqttClient.connect()
       .then(function(){
         console.log("Thing MQTT Connected");
+        $scope.isMQTTConnectedForThing = true;
       },
       function(err){
         alert('Error connecting: ' + JSON.stringify(err));
@@ -236,18 +251,75 @@ angular.module('mqttDemo.controllers',[])
   }
 
   $scope.onClickSendCommand = function() {
-    $scope.userMqttClient.sendMessage($scope.thingMqttClient.config.clientID, $scope.userMessage.actions);
-    console.log("send to", $scope.thingMqttClient.config.clientID, $scope.userMessage.actions);
+
+    var userObject = $scope.userInfo.userObject;
+
+    // fill message
+    var commandMessage = 'POST\n';
+    commandMessage += 'Content-type:application/json\n';
+    commandMessage += 'Authorization:Bearer ' + userObject._accessToken + '\n';
+    // mandatory blank line
+    commandMessage += '\n';
+    // payload
+    var payload ={
+      actions: JSON.parse($scope.userMessage.actions),
+      issuer: 'USER:' + userObject._uuid,
+      schema: 'SmartLight',
+      schemaVersion: 1
+    };
+    commandMessage += JSON.stringify(payload);
+
+    // fill topic
+    var topic = 'p/' + $scope.userMqttClient.config.clientID + '/thing-if/apps/' + $scope.KiiInfo.appID + '/targets/THING:'+$scope.thingInfo.thingID+'/commands' ;
+    
+    // send out the message to topic
+    $scope.userMqttClient.sendMessage(topic,commandMessage);
+
+    console.log("send to thing", topic, commandMessage);
   }
 
   $scope.onClickUpdateState = function() {
-    $scope.thingMqttClient.sendMessage($scope.userMqttClient.config.clientID, $scope.thingMessage.state);
-    console.log("send to", $scope.userMqttClient.config.clientID, $scope.thingMessage.state);
+
+    // fill message
+    var commandMessage = 'PUT\n';
+    commandMessage += 'Content-type:application/json\n';
+    commandMessage += 'Authorization:Bearer ' + $scope.thingInfo.accessToken + '\n';
+    // mandatory blank line
+    commandMessage += '\n';
+    // state
+    commandMessage += $scope.thingMessage.state;
+
+    // fill topic
+    var topic = 'p/' + $scope.thingMqttClient.config.clientID + '/thing-if/apps/' + $scope.KiiInfo.appID + '/targets/THING:'+$scope.thingInfo.thingID+'/states' ;
+    
+    // send out the message to topic
+    $scope.thingMqttClient.sendMessage(topic,commandMessage);
+
+    console.log("send to user", topic, commandMessage);
+
   }
 
   $scope.onClickSendActionResults = function() {
-    $scope.thingMqttClient.sendMessage($scope.userMqttClient.config.clientID, $scope.thingMessage.actionResults);
-    console.log("send to", $scope.userMqttClient.config.clientID, $scope.thingMessage.actionResults);
+
+    // fill message
+    var commandMessage = 'PUT\n';
+    commandMessage += 'Content-type:application/json\n';
+    commandMessage += 'Authorization:Bearer ' + $scope.thingInfo.accessToken + '\n';
+    // mandatory blank line
+    commandMessage += '\n';
+    // payload
+    var payload ={
+      actionResults: JSON.parse($scope.thingMessage.actionResults)
+    };
+    commandMessage += JSON.stringify(payload);
+
+    // fill topic
+    var topic = 'p/' + $scope.thingMqttClient.config.clientID + '/thing-if/apps/' + $scope.KiiInfo.appID + '/targets/THING:'+$scope.thingInfo.thingID+'/commands/' + $scope.commandIDs.pop() + '/action-results' ;
+    
+    // send out the message to topic
+    $scope.thingMqttClient.sendMessage(topic,commandMessage);
+
+    console.log("send to user", topic, commandMessage);
   }
 
 }])
