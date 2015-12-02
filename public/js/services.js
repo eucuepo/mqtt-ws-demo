@@ -69,7 +69,7 @@ angular.module('mqttDemo.services',[])
   	// fill onboarding message
   	var onboardingMessage = 'POST\n';
   	onboardingMessage += 'Content-type:application/vnd.kii.OnboardingWithVendorThingIDByOwner+json\n';
-  	onboardingMessage += 'Authorization:Bearer '+token+'\n';
+  	onboardingMessage += 'Authorization:Bearer ' + token + '\n';
   	// TODO: generate ID to check it back
   	onboardingMessage += 'X-Kii-RequestID:asdf1234\n';
   	// mandatory blank line
@@ -86,21 +86,50 @@ angular.module('mqttDemo.services',[])
   	
   }
 
+  var sendCommand = function(appID, actions, thingID, userID, token){
+
+  	// fill onboarding message
+  	var commandMessage = 'POST\n';
+  	commandMessage += 'Content-type:application/json\n';
+  	commandMessage += 'Authorization:Bearer ' + token + '\n';
+  	// TODO: generate ID to check it back
+  	commandMessage += 'X-Kii-RequestID:asdf1234\n';
+  	// mandatory blank line
+  	commandMessage += '\n';
+  	// payload
+  	var payload ={
+  		actions: actions,
+  		owner: 'USER:'+userID
+  	}
+  	commandMessage += JSON.stringify(payload);
+  	var topic = 'p/' + pahoClient.config.clientID + '/thing-if/apps/' + appID + '/targets' + '/THING:'+thingID+'/commands' ;
+  	pahoClient.sendMessage(topic,commandMessage);
+  	
+  }
+
   var parseResponse = function(message) {
+  	console.log(message);
   	var parsed = {
   		code:'',
   		headers:[],
   		payload:{}
   	}
-  	var lines = message.match(/\n/g)||[];
+  	var lines = message.split('\n');
   	console.log(lines);
   	parsed.code = lines[0];
-  	var i;
-  	for (i=1;i<lines.length;i++){
-  	  if(lines[i].length != 0){
+  	
+  	for (var i=1; i<lines.length; i++){
+  	  console.log(lines[i]);
+  	  if(lines[i] != ''){
   	  	parsed.headers.push(lines[i]);
   	  } else {
-  	  	lastLine = i;
+  	  	var payload = '';
+  	  	for(var j = i;j<lines.length;j++){
+	  		payload += lines[j];
+	  	}
+	  	console.log(payload);
+	  	parsed.payload = JSON.parse(payload);
+	  	return parsed;
   	  }
   	}
   }
