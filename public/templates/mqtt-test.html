@@ -5,16 +5,19 @@
       <form class="form-inline">
 	    <div class="form-group">
 		  <label for="appID">App ID</label>
-		  <input type="text" class="form-control" id="appID" ng-model="KiiInfo.appID">
+		  <input ng-hide="sdkInitialized" type="text" class="form-control" id="appID" ng-model="KiiInfo.appID">
+		  <span ng-show="sdkInitialized">{{KiiInfo.appID}}</span>
 		</div>
 		<div class="form-group">
 		  <label for="appKey">App Key</label>
-		  <input type="text" class="form-control" id="appKey" ng-model="KiiInfo.appKey">
+		  <input ng-hide="sdkInitialized" type="text" class="form-control" id="appKey" ng-model="KiiInfo.appKey">
+		  <span ng-show="sdkInitialized">{{KiiInfo.appID}}</span>
 		</div>
-		<select class="form-control" ng-model="KiiInfo.site">
+		<select ng-disabled="sdkInitialized" class="form-control" ng-model="KiiInfo.site">
 		  <option>dev-jp</option>
 		</select>
-		<button type="submit" class="btn btn-default" ng-click="onClickSetEnvironment()">Set environment</button>
+		<button ng-hide="sdkInitialized" type="submit" class="btn btn-default" ng-click="onClickSetEnvironment()">Set environment</button>
+		<button ng-show="sdkInitialized" type="submit" class="btn btn-default" ng-click="resetEnvironment()">Edit environment</button>
 	  </form>
     </div>
   </div>

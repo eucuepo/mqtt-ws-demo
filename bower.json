@@ -12,6 +12,7 @@
     "angular-mocks": "~1.4.0",
     "html5-boilerplate": "~5.2.0",
     "bower-paho-mqtt": "*",
-    "bootstrap": "~3.3.6"
+    "bootstrap": "~3.3.6",
+    "kii-cloud-sdk": "~2.1.23"
   }
 }

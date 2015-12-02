@@ -73,7 +73,7 @@ angular.module('mqttDemo.services',[])
 
   return {
     init: init,
-    onboardThing: onboardThing
+    onboardThing: onboardThing,
     disconnect: disconnect
   }
 }])
