@@ -73,7 +73,7 @@ angular.module('mqttDemo.services',[])
 
   return {
     init: init,
-    onboardThing: onboardThing
+    onboardThing: onboardThing,
     disconnect: disconnect
   }
 }])
@@ -83,7 +83,7 @@ angular.module('mqttDemo.services',[])
 
     xhr.open(method, url, true);
     xhr.onreadystatechange = function() {
-      if(xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
+      if(xhr.status == 200 || xhr.status == 201) {
         console.log("onComplete");
         callbacks.onComplete(xhr.responseText);
       } else {
@@ -91,7 +91,7 @@ angular.module('mqttDemo.services',[])
         console.log("readyState", xhr.readyState);
         console.log("status", xhr.status);
         console.log("responseText", xhr.responseText);
-        callbacks.onError(xhr.readystate, xhr.status, xhr.responseText);
+        callbacks.onFailure(xhr.readystate, xhr.status, xhr.responseText);
       }
     };
 

@@ -114,13 +114,12 @@ angular.module('mqttDemo.controllers',[])
           port: mqttEndpointInfo.portWS,
           username: mqttEndpointInfo.username,
           password: mqttEndpointInfo.password,
-          clientID: mqttEndpointInfo.installationID
+          clientID: mqttEndpointInfo.mqttTopic
         };
 
-        // TODO to add source code for MQTT connect
         // connectMQTTEndpoint(mqttClientConfig);
       },
-      onError: function(readyState, status, response) {
+      onFailure: function(readyState, status, response) {
         console.log("retry", retryCount);
         if(retryCount > 0) {
           setTimeout(function() {
@@ -134,13 +133,31 @@ angular.module('mqttDemo.controllers',[])
   }
 
   var connectMQTTEndpoint = function(mqttClientConfig){
-    mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
-      .then(function(){
-        $scope.connected = true;
+    // mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
+    //   .then(function(){
+    //     $scope.connected = true;
+    //     alert("MQTT Connected")
+    //   },
+    //   function(err){
+    //     alert('Error connecting: ' + JSON.stringify(err));
+    //   });
+  
+    var client = new Paho.MQTT.Client(mqttClientConfig.host, mqttClientConfig.port, mqttClientConfig.clientID);
+      // connect the client
+    client.connect({onSuccess:function(){
+        alert("MQTT Connected")
+        console.log("MQTT Connected");
       },
-      function(err){
-        alert('Error connecting: ' + JSON.stringify(err));
-      });
+      onFailure:function(err){
+        alert("MQTT onFailure")
+        console.log("MQTT onFailure", err);
+      }, 
+      userName: mqttClientConfig.username, 
+      password: mqttClientConfig.password}
+    );
+    
+    client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageReceived;
   }
 
   $scope.disconnect = function(){
@@ -154,6 +171,7 @@ angular.module('mqttDemo.controllers',[])
 
   var onConnectionLost = function(responseObject) {
     $scope.connected = false;
+    alert("Connection Lost");
   }
 
   var onMessageReceived = function(message) {
