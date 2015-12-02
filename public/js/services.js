@@ -83,10 +83,15 @@ angular.module('mqttDemo.services',[])
 
     xhr.open(method, url, true);
     xhr.onreadystatechange = function() {
-      if(xhr.status == 200 || xhr.status == 201) {
+      if(xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
         console.log("onComplete");
+        console.log("readyState", xhr.readyState);
+        console.log("status", xhr.status);
+        console.log("responseText", xhr.responseText);
+
         callbacks.onComplete(xhr.responseText);
-      } else {
+      } else if (xhr.status != 200 && xhr.status != 201){
+
         console.log("onError");
         console.log("readyState", xhr.readyState);
         console.log("status", xhr.status);
