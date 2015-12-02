@@ -137,6 +137,7 @@ angular.module('mqttDemo.services',[])
   return {
     init:init,
     onboardThing: onboardThing,
+    sendCommand: sendCommand,
     parseResponse: parseResponse
   }
 }])

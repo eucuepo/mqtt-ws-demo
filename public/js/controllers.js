@@ -39,9 +39,17 @@ angular.module('mqttDemo.controllers',[])
       actionResults: ""
     };
 
+    $scope.userMqttClient = {};
+
+    $scope.thingMqttClient = {};
+
     $scope.connected = false;
 
     $scope.sdkInitialized = false;
+
+    // the first message received will be treated as thing boarding response
+    // then change this field as true
+    $scope.onboarded = false;
 
   }
 
@@ -131,15 +139,7 @@ angular.module('mqttDemo.controllers',[])
 
       var mqttEndpointInfo = JSON.parse(response);
 
-      var mqttClientConfig = {
-        host: mqttEndpointInfo.host,
-        port: mqttEndpointInfo.portWS,
-        username: mqttEndpointInfo.username,
-        password: mqttEndpointInfo.password,
-        clientID: mqttEndpointInfo.mqttTopic
-      };
-
-      connectMQTTEndpointForUser(mqttClientConfig);
+      connectMQTTEndpointForUser(mqttEndpointInfo);
     };
 
     var onFailure = function(readyState, status, response) {
@@ -154,59 +154,99 @@ angular.module('mqttDemo.controllers',[])
     sendHttpRequest("GET", url, headers, null, onComplete, onFailure);
   }
 
-  var connectMQTTEndpointForUser = function(mqttClientConfig){
+  function connectMQTTEndpointForUser(mqttEndpointInfo){
+
+    var mqttClientConfig = {
+      host: mqttEndpointInfo.host,
+      port: mqttEndpointInfo.portWS,
+      username: mqttEndpointInfo.username,
+      password: mqttEndpointInfo.password,
+      clientID: mqttEndpointInfo.mqttTopic
+    };
 
     var onConnectionLost = function(responseObject) {
       $scope.connected = false;
       alert("Conneciton Lost");
-    }
+    };
 
     var onMessageReceived = function(message) {
       $scope.$apply(function () {
           $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
           alert("Message Received");
-      });
-    }
 
-    mqttClient.init(mqttClientConfig,onMessageReceived,onConnectionLost)
+          // check whether onboarding response
+          if(!$scope.onboarded) {
+            var parsed = kiiMqttClient.parseResponse(message);
+            connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
+
+            $scope.onboarded = true;
+          }
+      });
+    };
+
+    $scope.userMqttClient = mqttClient.getInstance(mqttClientConfig,onMessageReceived,onConnectionLost);
+    $scope.userMqttClient.connect()
       .then(function(){
         $scope.connected = true;
+        console.log("User MQTT Connected");
       },
       function(err){
         alert('Error connecting: ' + JSON.stringify(err));
+        console.log('Error connecting: ' + JSON.stringify(err));
+      });
+
+  }
+
+  function connectMQTTEndpointForThing(mqttEndpointInfo) {
+
+    var mqttClientConfig = {
+      host: mqttEndpointInfo.host,
+      port: mqttEndpointInfo.portWS,
+      username: mqttEndpointInfo.username,
+      password: mqttEndpointInfo.password,
+      clientID: mqttEndpointInfo.mqttTopic
+    };
+
+    var onMessageReceived = function(message) {
+      $scope.thingMessage.receivedActions += message + '\n';
+    };
+
+    var onConnectionLost = function(responseObject) {
+      alert("Conneciton Lost");
+    };
+
+    $scope.thingMqttClient = mqttClient.getInstance(mqttClientConfig,onMessageReceived,onConnectionLost);
+    $scope.thingMqttClient.connect()
+      .then(function(){
+        console.log("Thing MQTT Connected");
+      },
+      function(err){
+        alert('Error connecting: ' + JSON.stringify(err));
+        console.log('Error connecting: ' + JSON.stringify(err));
       });
   }
 
-  // $scope.disconnect = function(){
-  //   mqttClient.disconnect();
-  //   $scope.connected = false;
-  // }
-
-  // $scope.subscribe = function(topic){
-  //   mqttClient.subscribe(topic);
-  // }
-
   $scope.onClickRegisterThing = function(thingInfo) {
 
-    // TODO client for Thing?
-    var client;
-
-    kiiMqttClient.init(client);
+    kiiMqttClient.init($scope.userMqttClient);
 
     kiiMqttClient.onboardThing($scope.KiiInfo.appID, thingInfo.vendorThingID, thingInfo.password, $scope.userInfo.userObject._uuid, $scope.userInfo.userObject._accessToken);
 
   }
 
   $scope.onClickSendCommand = function() {
-
+    $scope.userMqttClient.sendMessage($scope.thingMqttClient.config.clientID, $scope.userMessage.actions);
+    console.log("send to", $scope.thingMqttClient.config.clientID, $scope.userMessage.actions);
   }
 
   $scope.onClickUpdateState = function() {
-
+    $scope.thingMqttClient.sendMessage($scope.userMqttClient.config.clientID, $scope.thingMessage.state);
+    console.log("send to", $scope.userMqttClient.config.clientID, $scope.thingMessage.state);
   }
 
   $scope.onClickSendActionResults = function() {
-
+    $scope.thingMqttClient.sendMessage($scope.userMqttClient.config.clientID, $scope.thingMessage.actionResults);
+    console.log("send to", $scope.userMqttClient.config.clientID, $scope.thingMessage.actionResults);
   }
 
 }])
