@@ -110,6 +110,26 @@ angular.module('mqttDemo.services',[])
     console.log("send to user", topic, stateMessage);
   }
 
+  MqttClient.prototype.updateActionResults = function(appID, actionResults, thingID, commandID, token){
+  	// fill message
+    var actionResultsMessage = 'PUT\n';
+    actionResultsMessage += 'Content-type:application/json\n';
+    actionResultsMessage += 'Authorization:Bearer ' + token + '\n';
+    // mandatory blank line
+    actionResultsMessage += '\n';
+    // payload
+    var payload = {
+      actionResults: JSON.parse(actionResults)
+    };
+    actionResultsMessage += JSON.stringify(payload);
+
+    // fill topic
+    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/targets/THING:'+thingID+'/commands/' + commandID + '/action-results';
+    
+    // send out the message to topic
+    this.sendMessage(topic,commandMessage);
+  }
+
   MqttClient.prototype.parseResponse = function(message) {
   	var parsed = {
   		code:'',

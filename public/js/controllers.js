@@ -179,6 +179,7 @@ angular.module('mqttDemo.controllers',[])
       $scope.$apply(function () {
           $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
           alert("Message Received", message);
+          console.log(message.destinationName);
 
           var parsed = $scope.userMqttClient.parseResponse(message.payloadString);
 
@@ -268,24 +269,7 @@ angular.module('mqttDemo.controllers',[])
 
   $scope.onClickSendActionResults = function() {
 
-    // fill message
-    var commandMessage = 'PUT\n';
-    commandMessage += 'Content-type:application/json\n';
-    commandMessage += 'Authorization:Bearer ' + $scope.thingInfo.accessToken + '\n';
-    // mandatory blank line
-    commandMessage += '\n';
-    // payload
-    var payload = {
-      actionResults: JSON.parse($scope.thingMessage.actionResults)
-    };
-    commandMessage += JSON.stringify(payload);
-
-    // fill topic
-    var topic = 'p/' + $scope.thingMqttClient.config.clientID + '/thing-if/apps/' + $scope.KiiInfo.appID + '/targets/THING:'+$scope.thingInfo.thingID+'/commands/' + $scope.commandIDs.pop() + '/action-results' ;
-    
-    // send out the message to topic
-    $scope.thingMqttClient.sendMessage(topic,commandMessage);
-
+    thingMqttClient.updateActionResults($scope.KiiInfo.appID, $scope.thingMessage.actionResults, $scope.thingInfo.thingID, $scope.commandIDs.pop(), $scope.thingInfo.accessToken);
     console.log("send to user", topic, commandMessage);
   }
 
