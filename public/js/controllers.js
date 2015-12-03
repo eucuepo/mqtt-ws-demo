@@ -3,12 +3,11 @@
 var KiiEnv = Kii;
 
 angular.module('mqttDemo.controllers',[])
-.controller('ConnectionCtrl', ['$scope','mqttClient', 'sendHttpRequest', function($scope,mqttClient, sendHttpRequest) {
+.controller('ConnectionCtrl', ['$scope','mqttClient', 'sendHttpRequest','consoleService', function($scope,mqttClient, sendHttpRequest,consoleService) {
 
   var Constant_X_Kii_RequestID = "asdf1234";
 
   $scope.init = function() {
-    console.log("init()");
 
     $scope.KiiInfo = {
       appID: "0ce64137",
@@ -56,6 +55,11 @@ angular.module('mqttDemo.controllers',[])
     $scope.isMQTTConnectedForThing = false;
 
     $scope.isMQTTConnectedForUser = false;
+
+    $scope.showConsole = true;
+    $scope.consoleOutput = consoleService.getConsoleOutput;
+
+    consoleService.log("init()");
 
   }
 
@@ -178,19 +182,18 @@ angular.module('mqttDemo.controllers',[])
     var onMessageReceived = function(message) {
       $scope.$apply(function () {
           $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
-          alert("Message Received by User", message);
-          console.log("message", message)
-          console.log("message.destinationName", message.destinationName);
 
-          var parsed = $scope.userMqttClient.parseResponse(message.payloadString);
+          consoleService.log(message.payloadString);
+          alert("Message Received", message);
+          console.log(message.destinationName);
+          var parsed = $scope.userMqttClient.parseResponse(message);
 
           // check whether onboarding response
-          if(!$scope.isMQTTConnectedForThing) {
-            
+          if(parsed.type == 'ONBOARD_THING') {
             $scope.thingInfo.thingID = parsed.payload.thingID;
             $scope.thingInfo.accessToken = parsed.payload.accessToken;
             connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
-          } else {
+          } else if(parsed.type == 'SEND_COMMAND') {
             $scope.commandIDs.push(parsed.payload.commandID);
             console.log("commandID", parsed.payload.commandID);
           }
@@ -322,7 +325,7 @@ angular.module('mqttDemo.controllers',[])
   var onMessageReceived = function(message) {
   	$scope.$apply(function () {
         //$scope.receivedMessages +=  message.payloadString + '\n';
-        $scope.receivedMessages += JSON.stringify(userMqttClient.parseResponse(message.payloadString)) + '\n';
+        $scope.receivedMessages += JSON.stringify(userMqttClient.parseResponse(message)) + '\n';
     });
   }
 

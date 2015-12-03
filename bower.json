@@ -13,6 +13,7 @@
     "html5-boilerplate": "~5.2.0",
     "bower-paho-mqtt": "*",
     "bootstrap": "~3.3.6",
-    "kii-cloud-sdk": "~2.1.23"
+    "kii-cloud-sdk": "~2.1.23",
+    "angular-bootstrap": "~0.14.3"
   }
 }

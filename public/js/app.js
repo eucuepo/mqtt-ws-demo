@@ -4,6 +4,7 @@ angular.module('mqttDemo', [
   'ngRoute',
   'mqttDemo.controllers',
   'mqttDemo.services',
+  'ui.bootstrap'
 ]).
 config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/demo', {
