@@ -235,6 +235,7 @@ angular.module('mqttDemo.controllers',[])
     $scope.thingMqttClient.connect()
       .then(function(){
         console.log("Thing MQTT Connected");
+        $scope.thingMqttClient.subscribe(mqttClientConfig.clientID);
         $scope.isMQTTConnectedForThing = true;
       },
       function(err){

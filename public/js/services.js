@@ -23,7 +23,7 @@ angular.module('mqttDemo.services',[])
 	  this.client.connect({
 	  	onSuccess:function(){
 	  		// auto subscribe to the topic
-	  		//this.client.subscribe(this.config.clientID);
+	  		// this.client.subscribe(this.config.clientID);
 	  		deferred.resolve();
 	  	},
 	  	onFailure:function(err){deferred.reject(err)}, 
