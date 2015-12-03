@@ -16,8 +16,8 @@ angular.module('mqttDemo.controllers',[])
     };
 
     $scope.userInfo = {
-      userName:"someusername",
-      password:"somepassword",
+      userName:"",
+      password:"",
       userObject:{}
     };
 
