@@ -186,15 +186,14 @@ angular.module('mqttDemo.controllers',[])
           alert("Message Received", message);
           console.log(message.destinationName);
 
-          var parsed = $scope.userMqttClient.parseResponse(message.payloadString);
+          var parsed = $scope.userMqttClient.parseResponse(message);
 
           // check whether onboarding response
-          if(!$scope.isMQTTConnectedForThing) {
-            
+          if(parsed.type == 'ONBOARD_THING') {
             $scope.thingInfo.thingID = parsed.payload.thingID;
             $scope.thingInfo.accessToken = parsed.payload.accessToken;
             connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
-          } else {
+          } else if(parsed.type == 'SEND_COMMAND') {
             $scope.commandIDs.push(parsed.payload.commandID);
             console.log("commandID", parsed.payload.commandID);
           }
@@ -324,7 +323,7 @@ angular.module('mqttDemo.controllers',[])
   var onMessageReceived = function(message) {
   	$scope.$apply(function () {
         //$scope.receivedMessages +=  message.payloadString + '\n';
-        $scope.receivedMessages += JSON.stringify(userMqttClient.parseResponse(message.payloadString)) + '\n';
+        $scope.receivedMessages += JSON.stringify(userMqttClient.parseResponse(message)) + '\n';
     });
   }
 

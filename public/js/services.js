@@ -130,11 +130,16 @@ angular.module('mqttDemo.services',[])
     this.sendMessage(topic,commandMessage);
   }
 
-  MqttClient.prototype.parseResponse = function(message) {
+  MqttClient.prototype.parseResponse = function(messageToParse) {
+
+  	var message = messageToParse.payloadString;
+  	var topic = messageToParse.destinationName;
+
   	var parsed = {
   		code:'',
   		headers:[],
-  		payload:{}
+  		payload:{},
+  		type: parseType(topic)
   	}
   	var lines = message.split('\n');
   	
@@ -154,6 +159,19 @@ angular.module('mqttDemo.services',[])
   	  	return parsed;
   	  }
   	}
+  }
+
+  function parseType(topic){
+
+    if(topic.search('p\/\s+\/thing-if\/apps\/\s+:\s+\/onboardings')){
+    	return 'ONBOARD_THING';
+    } else if(topic.search('p\/\s+\/thing-if\/apps\/\s+:\s+\/targets\s+\/commands')){
+    	return 'SEND_COMMAND';
+    } else if(topic.search('p\/\s+/thing-if\/apps\/\s+:\s+\/targets\/\s+\/states')){
+    	return 'UPDATE_STATE';
+    } else if(topic.search('p\/\s+\/thing-if\/apps\/\s+:\s+\/targets\/\s+\/commands\/\s+\/action-results')){
+    	return 'UPDATE_ACTION_RESULTS';
+    }
   }
 
   return {
