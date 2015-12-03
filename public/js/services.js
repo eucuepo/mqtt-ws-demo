@@ -47,6 +47,8 @@ angular.module('mqttDemo.services',[])
 
   // send message to topic
   MqttClient.prototype.sendMessage = function(topic,message) {
+    console.log("send message", topic, message);
+
   	var message = new Paho.MQTT.Message(message);
   	message.destinationName = topic;
     this.client.send(message);
@@ -106,8 +108,6 @@ angular.module('mqttDemo.services',[])
     
     // send out the message to topic
     this.sendMessage(topic,stateMessage);
-
-    console.log("send to user", topic, stateMessage);
   }
 
   MqttClient.prototype.updateActionResults = function(appID, actionResults, thingID, commandID, token){
@@ -127,7 +127,7 @@ angular.module('mqttDemo.services',[])
     var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/targets/THING:'+thingID+'/commands/' + commandID + '/action-results';
     
     // send out the message to topic
-    this.sendMessage(topic,commandMessage);
+    this.sendMessage(topic,actionResultsMessage);
   }
 
   MqttClient.prototype.parseResponse = function(message) {

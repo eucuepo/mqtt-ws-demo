@@ -178,8 +178,9 @@ angular.module('mqttDemo.controllers',[])
     var onMessageReceived = function(message) {
       $scope.$apply(function () {
           $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
-          alert("Message Received", message);
-          console.log(message.destinationName);
+          alert("Message Received by User", message);
+          console.log("message", message)
+          console.log("message.destinationName", message.destinationName);
 
           var parsed = $scope.userMqttClient.parseResponse(message.payloadString);
 
@@ -201,6 +202,7 @@ angular.module('mqttDemo.controllers',[])
       .then(function(){
         $scope.connected = true;
         console.log("User MQTT Connected");
+        $scope.userMqttClient.subscribe(mqttClientConfig.clientID);
         $scope.isMQTTConnectedForUser = true;
       },
       function(err){
@@ -224,6 +226,7 @@ angular.module('mqttDemo.controllers',[])
       $scope.$apply(function() {
         $scope.thingMessage.receivedActions += message.payloadString + '\n';
         console.log("message", message);
+        alert("Message Received by Thing", message);
       });
     };
 
@@ -271,7 +274,7 @@ angular.module('mqttDemo.controllers',[])
   $scope.onClickSendActionResults = function() {
 
     $scope.thingMqttClient.updateActionResults($scope.KiiInfo.appID, $scope.thingMessage.actionResults, $scope.thingInfo.thingID, $scope.commandIDs.pop(), $scope.thingInfo.accessToken);
-    console.log("send to user", topic, commandMessage);
+    
   }
 
 }])
