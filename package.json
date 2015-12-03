@@ -7,6 +7,6 @@
     "express": "~4.1.1"
   },
   "scripts": {
-    "start": "npm install && bower install"
+    "start": "npm install && bower install && node app.js"
   }
 }

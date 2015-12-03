@@ -50,8 +50,34 @@
 	  <hr>
 	  <form class="form">
 	    <div class="form-group">
-		  <label for="commandPayload">Command payload</label>
-		  <textarea type="text" class="form-control" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser||!isMQTTConnectedForThing" ng-model="userMessage.actions" id="commandPayload"/>
+		  <label for="commandPayload">Command actions</label>
+		  <div class="form-inline">
+		  	<input class="form-control" type="text" ng-model="action.name"/>
+		  	<select class="form-control" ng-model="action.type">
+			  <option>string</option>
+			  <option>boolean</option>
+			  <option>number</option>
+			</select>
+		  	<input class="form-control" type="text" ng-model="action.value"/>
+		  	<button class="btn btn-positive" ng-click="onClickAddAction(action)">+</button>
+		  </div>
+		  <table class="table table-striped">
+		  	<tr>
+		  	  <th>name</th>
+		  	  <th>type</th>
+		  	  <th>value</th>
+		  	  <th></th>
+		  	</tr>
+		  	<tr ng-repeat="actionValue in selectedActions">
+		  	  <td>{{actionValue.name}}</td>
+		  	  <td>{{actionValue.type}}</td>
+		  	  <td>{{actionValue.value}}</td>
+		  	  <td><button class="btn btn-danger" ng-click="onClickDeleteAction($index)">X</button></td>
+		  	</tr>
+		  </table>
+		  <!--
+		  <textarea type="text" class="form-control" ng-readonly="!sdkInitialized||!isMQTTConnectedForUser||!isMQTTConnectedForThing" id="commandPayload">{{userMessage.actions}}</textarea>
+		  -->
 		</div>
 		<button type="submit" class="btn btn-default" ng-click="onClickSendCommand()" ng-disabled="!sdkInitialized||!isMQTTConnectedForUser||!isMQTTConnectedForThing">Send command</button>
 	  </form>
@@ -115,7 +141,7 @@
 	  <div uib-collapse="showConsole">
         <form class="form">
       	  <div class="form-group">
-      	   <textarea class="form-control">{{consoleOutput()}}</textarea>
+      	   <textarea class="form-control monospace">{{consoleOutput()}}</textarea>
       	  </div>
         </form>
       </div>

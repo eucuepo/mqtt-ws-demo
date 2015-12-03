@@ -170,14 +170,14 @@ angular.module('mqttDemo.services',[])
   }
 
   function parseType(topic){
-
-    if(topic.search('p\/\s+\/thing-if\/apps\/\s+:\s+\/onboardings')){
+    
+    if(topic.search('p\/\w+\/thing-if\/apps\/\w+:\w+\/onboardings')){
     	return 'ONBOARD_THING';
-    } else if(topic.search('p\/\s+\/thing-if\/apps\/\s+:\s+\/targets\s+\/commands')){
+    } else if(topic.search('p\/\w+\/thing-if\/apps\/\w+\/targets\/\w+:[\w\-\.]*\/commands')){
     	return 'SEND_COMMAND';
-    } else if(topic.search('p\/\s+/thing-if\/apps\/\s+:\s+\/targets\/\s+\/states')){
+    } else if(topic.search('p\/\w+/thing-if\/apps\/\w+:\w+\/targets\/\w+:[\w\-\.]*\/states')){
     	return 'UPDATE_STATE';
-    } else if(topic.search('p\/\s+\/thing-if\/apps\/\s+:\s+\/targets\/\s+\/commands\/\s+\/action-results')){
+    } else if(topic.search('p\/\w+\/thing-if\/apps\/\w+:\s+\/targets\/\w+:[\w\-\.]*\/commands\/\[\w\-\.]*\/action-results')){
     	return 'UPDATE_ACTION_RESULTS';
     } else {
       return 'PUSH_MESSAGE';

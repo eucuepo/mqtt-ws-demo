@@ -32,7 +32,7 @@ angular.module('mqttDemo.controllers',[])
     // userMessage.receivedActionResults <= thingMessage.state
     // userMessage.receivedActionResults <= thingMessage.actionResults
     $scope.userMessage = {
-      actions: "",
+      actions: [],
       receivedActionResults: []
     };
 
@@ -61,6 +61,9 @@ angular.module('mqttDemo.controllers',[])
 
     $scope.showConsole = true;
     $scope.consoleOutput = consoleService.getConsoleOutput;
+
+    $scope.action = {type:'string'};
+    $scope.selectedActions = [];
 
     consoleService.log("init()");
 
@@ -285,7 +288,7 @@ angular.module('mqttDemo.controllers',[])
     var userObject = $scope.userInfo.userObject;
     // payload
     var payload ={
-      actions: JSON.parse($scope.userMessage.actions),
+      actions: $scope.userMessage.actions,
       issuer: 'USER:' + userObject._uuid,
       schema: 'SmartLight',
       schemaVersion: 1
@@ -303,6 +306,41 @@ angular.module('mqttDemo.controllers',[])
     $scope.thingMqttClient.updateActionResults($scope.KiiInfo.appID, $scope.thingMessage.actionResults, $scope.thingInfo.thingID, $scope.thingMessage.commandID, $scope.thingInfo.accessToken);
     
   }
+
+  $scope.onClickAddAction = function(action){
+  	if(!angular.isDefined(action.name) || !angular.isDefined(action.type) || !angular.isDefined(action.value)){
+  		return;
+  	}
+
+  	if(action.type == 'boolean' && !(action.value == 'true' || action.value == 'false')){
+  		return;
+  	}
+
+  	if(action.type == 'number' && !(!isNaN(parseFloat(action.value)) && isFinite(action.value))){
+  		return;
+  	}
+
+  	var insertAction ={
+  		name: action.name,
+  		type: action.type,
+  		value: action.value
+  	}
+  	var actionObject = {};
+  	if(action.type == 'string'){
+  		actionObject[action.name] = action.value;
+  	} else if (action.type == 'number'){
+  		actionObject[action.name] = new Number(action.value);
+  	} else if (action.type == 'boolean'){
+  		actionObject[action.name] = new Boolean(action.value);
+  	}
+  	$scope.selectedActions.push(insertAction);
+  	$scope.userMessage.actions.push(actionObject);
+  }
+
+  $scope.onClickDeleteAction = function(index){
+  	$scope.selectedActions.splice(index,1);
+  	$scope.userMessage.actions.splice(index, 1);
+  }  
 
 }])
 .controller('TestCtrl', ['$scope','mqttClient',function($scope, mqttClient) {
