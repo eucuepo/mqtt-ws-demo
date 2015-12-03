@@ -264,12 +264,12 @@ angular.module('mqttDemo.controllers',[])
   }
 
   $scope.onClickUpdateState = function() {
-    thingMqttClient.updateState($scope.KiiInfo.appID, $scope.thingMessage.state, $scope.thingInfo.thingID, $scope.thingInfo.accessToken);
+    $scope.thingMqttClient.updateState($scope.KiiInfo.appID, $scope.thingMessage.state, $scope.thingInfo.thingID, $scope.thingInfo.accessToken);
   }
 
   $scope.onClickSendActionResults = function() {
 
-    thingMqttClient.updateActionResults($scope.KiiInfo.appID, $scope.thingMessage.actionResults, $scope.thingInfo.thingID, $scope.commandIDs.pop(), $scope.thingInfo.accessToken);
+    $scope.thingMqttClient.updateActionResults($scope.KiiInfo.appID, $scope.thingMessage.actionResults, $scope.thingInfo.thingID, $scope.commandIDs.pop(), $scope.thingInfo.accessToken);
     console.log("send to user", topic, commandMessage);
   }
 
