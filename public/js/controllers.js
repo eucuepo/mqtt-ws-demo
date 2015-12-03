@@ -80,7 +80,7 @@ angular.module('mqttDemo.controllers',[])
 
     KiiEnv.initializeWithSite($scope.KiiInfo.appID, $scope.KiiInfo.appKey, site);
     $scope.sdkInitialized = true;
-    console.log('Kii sdk initialized');
+    consoleService.log('Kii sdk initialized');
 
   }
 
@@ -89,7 +89,7 @@ angular.module('mqttDemo.controllers',[])
   }
 
   $scope.onClickRegisterUser = function(userInfo) {
-    console.log(userInfo.userName, userInfo.password);
+    consoleService.log(userInfo.userName + " " + userInfo.password);
 
     // Create the KiiUser object
     var user = KiiUser.userWithUsername(userInfo.userName, userInfo.password);
@@ -99,9 +99,9 @@ angular.module('mqttDemo.controllers',[])
       // Called on successful registration
       success: function(theUser) {
         // Print some info to the log
-        console.log("User registered!");
-        console.log(theUser);
-        console.log("user id: " + theUser._uuid);
+        consoleService.log("User registered!");
+        consoleService.log(theUser);
+        consoleService.log("user id: " + theUser._uuid);
 
         $scope.userInfo.userObject = theUser;
 
@@ -110,7 +110,7 @@ angular.module('mqttDemo.controllers',[])
       // Called on a failed registration
       failure: function(theUser, errorString) {
         // Print some info to the log
-        console.log("Error registering: " + errorString);
+        consoleService.log("Error registering: " + errorString);
       }
     });
   }
@@ -159,7 +159,7 @@ angular.module('mqttDemo.controllers',[])
     };
 
     var onFailure = function(readyState, status, response) {
-      console.log("retry", retryCount);
+      consoleService.log("retry: " + retryCount);
       if(retryCount > 0) {
         setTimeout(function() {
           retrieveMQTTEndpointForUser(theUser, installationID, retryCount-1);
@@ -189,12 +189,12 @@ angular.module('mqttDemo.controllers',[])
       $scope.$apply(function () {
           consoleService.log(message.payloadString);
           alert("Message Received", message);
-          console.log(message.destinationName);
-          console.log("message", message);
+          consoleService.log(message.destinationName);
+          consoleService.log("message " + JSON.stringify(message));
 
           var parsed = $scope.userMqttClient.parseResponse(message);
           
-          console.log("parsed", parsed);
+          consoleService.log("parsed " + JSON.stringify(parsed));
 
           // check whether onboarding response
           if(parsed.type == 'ONBOARD_THING') {
@@ -202,7 +202,7 @@ angular.module('mqttDemo.controllers',[])
             $scope.thingInfo.accessToken = parsed.payload.accessToken;
             connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
           } else if(parsed.type == 'SEND_COMMAND') {
-            console.log("commandID", parsed.payload.commandID);
+            consoleService.log("commandID " + parsed.payload.commandID);
             var actions = {commandID: parsed.payload.commandID, actionResults:{}};
             $scope.userMessage.receivedActionResults.push(actions);
           } else if(parsed.type == 'UPDATE_ACTION_RESULTS') {
@@ -222,13 +222,13 @@ angular.module('mqttDemo.controllers',[])
     $scope.userMqttClient.connect()
       .then(function(){
         $scope.connected = true;
-        console.log("User MQTT Connected");
+        consoleService.log("User MQTT Connected");
         $scope.userMqttClient.subscribe(mqttClientConfig.clientID);
         $scope.isMQTTConnectedForUser = true;
       },
       function(err){
         alert('Error connecting: ' + JSON.stringify(err));
-        console.log('Error connecting: ' + JSON.stringify(err));
+        consoleService.log('Error connecting: ' + JSON.stringify(err));
       });
 
   }
@@ -245,15 +245,13 @@ angular.module('mqttDemo.controllers',[])
 
     var onMessageReceived = function(message) {
       $scope.$apply(function() {
-        console.log("message", message);
+        consoleService.log("message " + JSON.stringify(message));
         alert("Message Received by Thing", message);
 
         var parsed = $scope.thingMqttClient.parseResponse(message);
-        console.log("parsed", parsed);
+        consoleService.log("parsed " + JSON.stringify(parsed));
 
-        if(parsed.type == 'UPDATE_ACTION_RESULTS') {
-          $scope.thingMessage.receivedActions.push(parsed);
-        } else if(parsed.type == 'PUSH_MESSAGE'){
+        if(parsed.type == 'PUSH_MESSAGE'){
           $scope.thingMessage.receivedActions.push(parsed.payload);
         }
         
@@ -267,13 +265,13 @@ angular.module('mqttDemo.controllers',[])
     $scope.thingMqttClient = mqttClient.getInstance(mqttClientConfig,onMessageReceived,onConnectionLost);
     $scope.thingMqttClient.connect()
       .then(function(){
-        console.log("Thing MQTT Connected");
+        consoleService.log("Thing MQTT Connected");
         $scope.thingMqttClient.subscribe(mqttClientConfig.clientID);
         $scope.isMQTTConnectedForThing = true;
       },
       function(err){
         alert('Error connecting: ' + JSON.stringify(err));
-        console.log('Error connecting: ' + JSON.stringify(err));
+        consoleService.log('Error connecting: ' + JSON.stringify(err));
       });
   }
 

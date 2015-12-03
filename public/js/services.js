@@ -132,6 +132,8 @@ angular.module('mqttDemo.services',[])
 
   MqttClient.prototype.parseResponse = function(messageToParse) {
 
+    console.log("messageToParse", messageToParse);
+
   	var message = messageToParse.payloadString;
   	var topic = messageToParse.destinationName;
 
@@ -154,7 +156,7 @@ angular.module('mqttDemo.services',[])
   	parsed.code = lines[0].replace('\r','');
   	
   	for (var i=1; i<lines.length; i++){
-  	  console.log(lines[i], lines[i].length);
+  	  // console.log(lines[i], lines[i].length);
   	  if(lines[i] != '{'){
   	  	parsed.headers.push(lines[i].replace('\r',''));
   	  } else {
@@ -167,24 +169,38 @@ angular.module('mqttDemo.services',[])
   	  	return parsed;
   	  }
   	}
+
+    return parsed;
   }
 
   function parseType(topic){
     
-    if(topic.search('p\/\w+\/thing-if\/apps\/\w+:\w+\/onboardings')){
-    	return 'ONBOARD_THING';
-    } else if(topic.search('p\/\w+\/thing-if\/apps\/\w+\/targets\/\w+:[\w\-\.]*\/commands')){
-    	return 'SEND_COMMAND';
-    } else if(topic.search('p\/\w+/thing-if\/apps\/\w+:\w+\/targets\/\w+:[\w\-\.]*\/states')){
-    	return 'UPDATE_STATE';
-    } else if(topic.search('p\/\w+\/thing-if\/apps\/\w+:\s+\/targets\/\w+:[\w\-\.]*\/commands\/\[\w\-\.]*\/action-results')){
-    	return 'UPDATE_ACTION_RESULTS';
+    // if(topic.search('p\/\w+\/thing-if\/apps\/\w+\/targets\/\w+:[\w\-\.]+\/commands\/[\w\-\.]+\/action\-results')){
+    //   return 'UPDATE_ACTION_RESULTS';
+    // }  else if(topic.search('p\/\w+\/thing-if\/apps\/\w+\/targets\/\w+:[\w\-\.]*\/commands')){
+    // 	return 'SEND_COMMAND';
+    // } else if(topic.search('p\/\w+/thing-if\/apps\/\w+:\w+\/targets\/\w+:[\w\-\.]*\/states')){
+    // 	return 'UPDATE_STATE';
+    // } else if(topic.search('p\/\w+\/thing-if\/apps\/\w+:\w+\/onboardings')){
+    //   return 'ONBOARD_THING';
+    // } else {
+    //   return 'PUSH_MESSAGE';
+    // }
+
+    if(topic.lastIndexOf('action-results') > 0){
+      return 'UPDATE_ACTION_RESULTS';
+    }  else if(topic.lastIndexOf('commands') > 0){
+      return 'SEND_COMMAND';
+    } else if(topic.lastIndexOf('states') > 0){
+      return 'UPDATE_STATE';
+    } else if(topic.lastIndexOf('onboardings') > 0){
+      return 'ONBOARD_THING';
     } else {
       return 'PUSH_MESSAGE';
     }
 
   }
-
+console.log(parseType('p/xVt1PxeLgNdb8dKeJQPBDxa/thing-if/apps/0ce64137/targets/THING:th.0267251d9d60-c79a-5e11-3999-002f3f69/commands/kkk/action-results'));
   return {
     getInstance: function (config, messageHandler, disconnectHandler) {
       return new MqttClient(config, messageHandler, disconnectHandler);
