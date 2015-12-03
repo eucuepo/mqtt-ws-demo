@@ -173,12 +173,12 @@ angular.module('mqttDemo.services',[])
     
     if(topic.search('p\/\w+\/thing-if\/apps\/\w+:\w+\/onboardings')){
     	return 'ONBOARD_THING';
+    } else if(topic.search('p\/\w+\/thing-if\/apps\/\w+:\s+\/targets\/\w+:[\w\-\.]*\/commands\/\[\w\-\.]*\/action\-results')){
+    	return 'UPDATE_ACTION_RESULTS';
     } else if(topic.search('p\/\w+\/thing-if\/apps\/\w+\/targets\/\w+:[\w\-\.]*\/commands')){
     	return 'SEND_COMMAND';
     } else if(topic.search('p\/\w+/thing-if\/apps\/\w+:\w+\/targets\/\w+:[\w\-\.]*\/states')){
     	return 'UPDATE_STATE';
-    } else if(topic.search('p\/\w+\/thing-if\/apps\/\w+:\s+\/targets\/\w+:[\w\-\.]*\/commands\/\[\w\-\.]*\/action-results')){
-    	return 'UPDATE_ACTION_RESULTS';
     } else {
       return 'PUSH_MESSAGE';
     }
