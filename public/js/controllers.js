@@ -33,16 +33,19 @@ angular.module('mqttDemo.controllers',[])
     // userMessage.receivedActionResults <= thingMessage.actionResults
     $scope.userMessage = {
       actions: "",
-      receivedActionResults: ""
+      receivedActionResults: []
     };
 
     $scope.thingMessage = {
-      receivedActions: "",
+      receivedActions:[],
       state: "",
-      actionResults: ""
+      actionResults:"",
+      commandID:""
     };
 
-    $scope.commandIDs = [];
+    // $scope.thingMessage.receivedActions.push({commandID:"someID1"});
+    // $scope.thingMessage.receivedActions.push({commandID:"someID2"});
+    // $scope.thingMessage.receivedActions.push({commandID:"someID3"});
 
     $scope.userMqttClient = {};
 
@@ -181,12 +184,14 @@ angular.module('mqttDemo.controllers',[])
 
     var onMessageReceived = function(message) {
       $scope.$apply(function () {
-          $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
-
           consoleService.log(message.payloadString);
           alert("Message Received", message);
           console.log(message.destinationName);
+          console.log("message", message);
+
           var parsed = $scope.userMqttClient.parseResponse(message);
+          
+          console.log("parsed", parsed);
 
           // check whether onboarding response
           if(parsed.type == 'ONBOARD_THING') {
@@ -194,8 +199,18 @@ angular.module('mqttDemo.controllers',[])
             $scope.thingInfo.accessToken = parsed.payload.accessToken;
             connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
           } else if(parsed.type == 'SEND_COMMAND') {
-            $scope.commandIDs.push(parsed.payload.commandID);
             console.log("commandID", parsed.payload.commandID);
+            var actions = {commandID: parsed.payload.commandID, actionResults:{}};
+            $scope.userMessage.receivedActionResults.push(actions);
+          } else if(parsed.type == 'UPDATE_ACTION_RESULTS') {
+            // user can't receive this message type?
+          } else if(parsed.type == 'PUSH_MESSAGE') {
+            for(var i=0;i<$scope.userMessage.receivedActionResults.length;i++) {
+              if($scope.userMessage.receivedActionResults[i].commandID == parsed.payload.commandID) {
+                $scope.userMessage.receivedActionResults[i].actionResults = parsed.payload;
+                break;
+              }
+            }
           }
       });
     };
@@ -227,9 +242,18 @@ angular.module('mqttDemo.controllers',[])
 
     var onMessageReceived = function(message) {
       $scope.$apply(function() {
-        $scope.thingMessage.receivedActions += message.payloadString + '\n';
         console.log("message", message);
         alert("Message Received by Thing", message);
+
+        var parsed = $scope.thingMqttClient.parseResponse(message);
+        console.log("parsed", parsed);
+
+        if(parsed.type == 'UPDATE_ACTION_RESULTS') {
+          $scope.thingMessage.receivedActions.push(parsed);
+        } else if(parsed.type == 'PUSH_MESSAGE'){
+          $scope.thingMessage.receivedActions.push(parsed.payload);
+        }
+        
       });
     };
 
@@ -276,7 +300,7 @@ angular.module('mqttDemo.controllers',[])
 
   $scope.onClickSendActionResults = function() {
 
-    $scope.thingMqttClient.updateActionResults($scope.KiiInfo.appID, $scope.thingMessage.actionResults, $scope.thingInfo.thingID, $scope.commandIDs.pop(), $scope.thingInfo.accessToken);
+    $scope.thingMqttClient.updateActionResults($scope.KiiInfo.appID, $scope.thingMessage.actionResults, $scope.thingInfo.thingID, $scope.thingMessage.commandID, $scope.thingInfo.accessToken);
     
   }
 

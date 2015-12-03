@@ -141,6 +141,14 @@ angular.module('mqttDemo.services',[])
   		payload:{},
   		type: parseType(topic)
   	}
+
+    // in the case of no header
+    if(message.charAt(0) == "{") {
+      parsed.payload = JSON.parse(message);
+      return parsed;
+    }
+
+    // in the case of header
   	var lines = message.split('\n');
   	
   	parsed.code = lines[0].replace('\r','');
@@ -171,7 +179,10 @@ angular.module('mqttDemo.services',[])
     	return 'UPDATE_STATE';
     } else if(topic.search('p\/\s+\/thing-if\/apps\/\s+:\s+\/targets\/\s+\/commands\/\s+\/action-results')){
     	return 'UPDATE_ACTION_RESULTS';
+    } else {
+      return 'PUSH_MESSAGE';
     }
+
   }
 
   return {

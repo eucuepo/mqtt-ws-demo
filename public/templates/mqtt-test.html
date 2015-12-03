@@ -57,21 +57,38 @@
 	  </form>
 	  <hr>
 	  <form class="form">
-	    <div class="form-group">
+	    <!-- <div class="form-group">
 		  <label for="actionResults">Action results</label>
 		  <textarea type="text" class="form-control" id="actionResults" ng-model="userMessage.receivedActionResults" readonly/>
-		</div>
+		</div> -->
+
+		<label for="actionResults">Action results</label>
+		<div class="form-group" ng-repeat="result in userMessage.receivedActionResults">  
+		  	<label>{{result.commandID}}</label>
+		  	<textarea type="text" class="form-control ng-valid ng-not-empty ng-dirty ng-touched" id="actionResults" readonly>{{result.actionResults}}</textarea>
+		  
+	    </div>
 	  </form>
 
     </div>
     <div class="col-md-6">
       <h3 class="well">Thing Dashboard</h3>
       <p>Status: {{isMQTTConnectedForThing?"Connected":"Not Connected"}}</p>
-      <form class="form">
+      <!-- <form class="form">
 	    <div class="form-group">
 		  <label for="actionResults">Actions</label>
-		  <textarea type="text" class="form-control" ng-model="thingMessage.receivedActions" id="actionResults" readonly/>
+		  <textarea type="text" class="form-control ng-valid ng-not-empty ng-dirty ng-touched" ng-model="thingMessage.receivedActions" id="actionResults" readonly/>
 		</div>
+	  </form> -->
+	  <form class="form">
+	  	<label for="actionResults">Actions</label>
+		<div class="form-group" ng-repeat="actions in thingMessage.receivedActions">  
+          
+		  	<input type="radio" ng-model="$parent.thingMessage.commandID" value="{{actions.commandID}}">
+		  	{{actions.commandID}}</input>
+		  	<textarea type="text" class="form-control ng-valid ng-not-empty ng-dirty ng-touched" id="actionResults" readonly>{{actions}}</textarea>
+		  
+	    </div>
 	  </form>
 	  <hr>
 	  <form class="form">
