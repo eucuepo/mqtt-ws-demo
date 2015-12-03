@@ -4,6 +4,7 @@ angular.module('mqttDemo', [
   'ngRoute',
   'mqttDemo.controllers',
   'mqttDemo.services',
+  'mqttDemo.filters',
   'ui.bootstrap'
 ]).
 config(['$routeProvider', function($routeProvider) {
