@@ -91,4 +91,17 @@
 	  </form>
    </div>
   </div>
+  <div class="row">
+    <div class="col-md-12 well">
+      <button type="button" class="btn btn-default" ng-click="showConsole = !showConsole">Toggle console</button>
+      <hr>
+	  <div uib-collapse="showConsole">
+        <form class="form">
+      	  <div class="form-group">
+      	   <textarea class="form-control">{{consoleOutput()}}</textarea>
+      	  </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

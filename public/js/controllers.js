@@ -3,12 +3,11 @@
 var KiiEnv = Kii;
 
 angular.module('mqttDemo.controllers',[])
-.controller('ConnectionCtrl', ['$scope','mqttClient', 'sendHttpRequest', function($scope,mqttClient, sendHttpRequest) {
+.controller('ConnectionCtrl', ['$scope','mqttClient', 'sendHttpRequest','consoleService', function($scope,mqttClient, sendHttpRequest,consoleService) {
 
   var Constant_X_Kii_RequestID = "asdf1234";
 
   $scope.init = function() {
-    console.log("init()");
 
     $scope.KiiInfo = {
       appID: "0ce64137",
@@ -56,6 +55,11 @@ angular.module('mqttDemo.controllers',[])
     $scope.isMQTTConnectedForThing = false;
 
     $scope.isMQTTConnectedForUser = false;
+
+    $scope.showConsole = true;
+    $scope.consoleOutput = consoleService.getConsoleOutput;
+
+    consoleService.log("init()");
 
   }
 
@@ -178,6 +182,7 @@ angular.module('mqttDemo.controllers',[])
     var onMessageReceived = function(message) {
       $scope.$apply(function () {
           $scope.userMessage.receivedActionResults +=  message.payloadString + '\n';
+          consoleService.log(message.payloadString);
           alert("Message Received", message);
           console.log(message.destinationName);
 

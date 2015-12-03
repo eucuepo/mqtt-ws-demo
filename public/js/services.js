@@ -162,6 +162,19 @@ angular.module('mqttDemo.services',[])
     }
   }
 }])
+.factory('consoleService', ['$q',function mqttClientFactory($q) {
+  
+  var consoleOutput = '';
+
+  return {
+  	getConsoleOutput: function(){
+  		return consoleOutput;
+  	},
+  	log: function(text) {
+  	  consoleOutput += text + '\n';
+  	}
+  } 
+}])
 .factory('sendHttpRequest', function() {
   return function(method, url, headers, data, completeHandler, failureHandler) {
     var xhr = new XMLHttpRequest();
