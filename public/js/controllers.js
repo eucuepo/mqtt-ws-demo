@@ -3,7 +3,7 @@
 var KiiEnv = Kii;
 
 angular.module('mqttDemo.controllers',[])
-.controller('ConnectionCtrl', ['$scope','mqttClient', 'sendHttpRequest','consoleService', function($scope,mqttClient, sendHttpRequest,consoleService) {
+.controller('ConnectionCtrl', ['$scope','$timeout','mqttClient', 'sendHttpRequest','consoleService', function($scope,$timeout,mqttClient, sendHttpRequest,consoleService) {
 
   var Constant_X_Kii_RequestID = "asdf1234";
 
@@ -182,11 +182,11 @@ angular.module('mqttDemo.controllers',[])
 
     var onConnectionLost = function(responseObject) {
       $scope.connected = false;
-      alert("Conneciton Lost");
+      alert("Conneciton Lost "+ JSON.stringify(responseObject));
     };
 
     var onMessageReceived = function(message) {
-      $scope.$apply(function () {
+      $timeout(function() {
           consoleService.log(message.payloadString);
           alert("Message Received", message);
           consoleService.log(message.destinationName);
@@ -215,7 +215,7 @@ angular.module('mqttDemo.controllers',[])
               }
             }
           }
-      });
+      },0);
     };
 
     $scope.userMqttClient = mqttClient.getInstance(mqttClientConfig,onMessageReceived,onConnectionLost);
